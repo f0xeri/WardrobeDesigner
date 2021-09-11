@@ -6,6 +6,7 @@
 #define MINE_STATE_HPP
 
 #include "Camera.h"
+#include "Scene.hpp"
 
 struct State
 {
@@ -13,13 +14,14 @@ struct State
     float speed = 12.f;
     GLFWwindow *window;
     Camera *camera;
-
+    Scene *scene;
     float deltaX = 0.0f;
     float deltaY = 0.0f;
 
     float x = 0.0f;
     float y = 0.0f;
-
+    unsigned int idBuffer;
+    unsigned int pickedObject = -1;
     bool cursor_locked = false;
     bool cursor_started = false;
     bool show_debug = false;

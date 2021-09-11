@@ -3,6 +3,7 @@
 //
 
 #include "Object/Cube.hpp"
+#include "Logger.hpp"
 
 void Cube::generateVAO() {
     std::vector<glm::vec3> cube = {
@@ -47,9 +48,9 @@ void Cube::generateVAO() {
     for (int i = 0; i < 6; ++i)
     {
         cubeTexCoords.insert(cubeTexCoords.end(), {
-                {0, 1},
-                {1, 1},
-                {1, 0},
+                {0, 2048},
+                {2048, 2048},
+                {2048, 0},
                 {0, 0}
         });
     }

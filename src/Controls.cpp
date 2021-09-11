@@ -4,8 +4,10 @@
 
 #include <thread>
 #include <iostream>
+#include <glm/ext/matrix_projection.hpp>
 #include "Controls.h"
 #include "Window.h"
+#include "Logger.hpp"
 
 State *localState;
 
@@ -88,6 +90,27 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
     }
     localState->deltaX = localState->deltaY = 0.0f;
 }
+
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, localState->idBuffer);
+    if (localState->cursor_locked) return;
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        unsigned char data[4];
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        glReadPixels(x, Window::_height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+        int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
+        localState->pickedObject = pickedID;
+    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 
 void resizeCallback(GLFWwindow *window, int width, int height)
 {

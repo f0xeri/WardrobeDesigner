@@ -21,7 +21,8 @@ set(SRC ${PROJECT_SOURCE_DIR}/src/main.cpp
         ${PROJECT_SOURCE_DIR}/src/Texture.cpp
         ${PROJECT_SOURCE_DIR}/src/ObjectLoader.cpp
         ${PROJECT_SOURCE_DIR}/src/Camera.cpp
-        ${PROJECT_SOURCE_DIR}/src/Program.cpp
+        ${PROJECT_SOURCE_DIR}/src/Shader.cpp
+        ${PROJECT_SOURCE_DIR}/src/MousePicker.cpp
         ${PROJECT_SOURCE_DIR}/src/Texture.cpp
         ${PROJECT_SOURCE_DIR}/src/Controls.cpp
         ${PROJECT_SOURCE_DIR}/src/Object/IObject.cpp
@@ -34,7 +35,7 @@ add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 target_compile_features(${CMAKE_PROJECT_NAME} INTERFACE cxx_std_17)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${GLEW_INCLUDE_DIRS})
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/glew-cmake/include)
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/glfw/include)
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/glm)
 

@@ -11,7 +11,7 @@
 #include "Logger.hpp"
 #include "ObjectLoader.h"
 #include "Camera.h"
-#include "Program.hpp"
+#include "Shader.hpp"
 #include "Texture.hpp"
 #include "Controls.h"
 #include "Object/Cube.hpp"
@@ -130,6 +130,7 @@ Window::Window(const char *title, int width, int height)
     glfwSetWindowSizeCallback(mainWindow, resizeCallback);
     glfwSetCursorPosCallback(mainWindow, cursorCallback);
     glfwSetKeyCallback(mainWindow, keyCallback);
+    glfwSetMouseButtonCallback(mainWindow, mouseButtonCallback);
     toggleCursor(mainWindow);
 }
 
@@ -204,14 +205,26 @@ bool doesCubeIntersectSphere(Cube *cube, Sphere *sphere)
     return dist_squared > 0;
 }
 
-void renderScene(nModel::Program &shader, nModel::Program &skyboxShader, Cube *cube, Cube *cube2, Sphere *sphere, vec3 startPos)
+void renderScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere, vec3 startPos, Texture *texture, Texture *grassAlbedo, bool colorIdPass)
 {
+    glActiveTexture(GL_TEXTURE0);
+    grassAlbedo->bind();
     glm::mat4 model = glm::mat4(1.0f);
     shader.uniformMatrix(model, "model");
+    if (state->pickedObject == 0)
+        shader.setInt(1, "isPicked");
+    else
+        shader.setInt(0, "isPicked");
     cube->draw();
 
+    glActiveTexture(GL_TEXTURE0);
+    texture->bind();
     model = glm::mat4(1.0f);
     shader.uniformMatrix(model, "model");
+    if (state->pickedObject == 1)
+        shader.setInt(1, "isPicked");
+    else
+        shader.setInt(0, "isPicked");
     cube2->draw();
 
     if (doesCubeIntersectSphere(cube, sphere))
@@ -232,8 +245,52 @@ void renderScene(nModel::Program &shader, nModel::Program &skyboxShader, Cube *c
     model = glm::mat4(1.0f);
     model = glm::translate(model, sphereTranslate);
     shader.uniformMatrix(model, "model");
+    if (state->pickedObject == 2)
+        shader.setInt(1, "isPicked");
+    else
+        shader.setInt(0, "isPicked");
     sphere->draw();
+}
 
+void renderSceneId(Shader &shader, Scene *scene, Cube *cube, Cube *cube2, Sphere *sphere, vec3 startPos)
+{
+    /*for (int i = 0; i < scene->objects.size(); i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        shader.uniformMatrix(model, "model");
+        int r = (i & 0x000000FF) >>  0;
+        int g = (i & 0x0000FF00) >>  8;
+        int b = (i & 0x00FF0000) >> 16;
+        glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+        scene->objects[i]->draw();
+    }*/
+
+    glm::mat4 model = glm::mat4(1.0f);
+    shader.uniformMatrix(model, "model");
+    int r = (0 & 0x000000FF) >>  0;
+    int g = (0 & 0x0000FF00) >>  8;
+    int b = (0 & 0x00FF0000) >> 16;
+    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    cube->draw();
+
+    model = glm::mat4(1.0f);
+    shader.uniformMatrix(model, "model");
+    r = (1 & 0x000000FF) >>  0;
+    g = (1 & 0x0000FF00) >>  8;
+    b = (1 & 0x00FF0000) >> 16;
+    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    cube2->draw();
+
+    model = glm::mat4(1.0f);
+    vec3 sphereTranslate = sphere->position - startPos;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, sphereTranslate);
+    shader.uniformMatrix(model, "model");
+    r = (2 & 0x000000FF) >>  0;
+    g = (2 & 0x0000FF00) >>  8;
+    b = (2 & 0x00FF0000) >> 16;
+    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    sphere->draw();
 }
 
 unsigned int quadVAO = 0;
@@ -270,7 +327,7 @@ void Window::startLoop()
     glEnable(GL_DEPTH_TEST);
     ObjectLoader loader;
 
-    Cube *cube = new Cube({0, 0, 0}, {1500, 1, 1500});
+    Cube *cube = new Cube({0, 0, 0}, {2048, 1, 2048});
     cube->physicsEnabled = true;
     cube->collisionEnabled = true;
     cube->generateVAO();
@@ -295,12 +352,16 @@ void Window::startLoop()
     scene->addObject(cube);
     scene->addObject(cube2);
     scene->addObject(sphere);
-
+    state->scene = scene;
 
     glEnable(GL_DEPTH_TEST);
     state->camera = new Camera(glm::vec3(750.0f, 15.0f, 800.0f), radians(60.0f));
 
     Texture *texture = new Texture("res/textures/cube.jpg");
+
+    Texture *grassAlbedo = new Texture("res/textures/grass_material/grass1-albedo3.png");
+    grassAlbedo->loadTexture();
+
 
     Texture *skyboxTexture = new Texture("skybox");
     std::vector<std::string> faces
@@ -336,16 +397,35 @@ void Window::startLoop()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    nModel::Program shader("vert", "frag");
+    //unsigned int idBuffer;
+    glGenFramebuffers(1, &state->idBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, state->idBuffer);
+    unsigned int idColor;
+    glGenTextures(1, &idColor);
+    glBindTexture(GL_TEXTURE_2D, idColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, idColor, 0);
+    unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, attachments);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    Shader shader("vert", "frag");
     shader.link();
 
-    nModel::Program skyboxShader("vertSkybox", "fragSkybox");
+    Shader colorIdShader("colorPickVert", "colorPickFrag");
+    colorIdShader.link();
+
+    Shader skyboxShader("vertSkybox", "fragSkybox");
     skyboxShader.link();
 
-    nModel::Program simpleDepthShader("vertDepthShader", "fragDepthShader");
+    Shader simpleDepthShader("vertDepthShader", "fragDepthShader");
     simpleDepthShader.link();
 
-    nModel::Program debugQuad("vertDebugQuad", "fragDebugQuad");
+    Shader debugQuad("vertDebugQuad", "fragDebugQuad");
     debugQuad.setInt(0, "depthMap");
     debugQuad.link();
 
@@ -359,11 +439,6 @@ void Window::startLoop()
         lastTime = currentTime;
 
         updateInputs(mainWindow);
-
-        //lightPos.x = 5 + sin(glfwGetTime()) * 3.0f;
-        //lightPos.z = 5 + cos(glfwGetTime()) * 2.0f;
-        //lightPos.y = 12.0 + cos(glfwGetTime()) * 1.0f;
-
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -383,10 +458,24 @@ void Window::startLoop()
 
             glActiveTexture(GL_TEXTURE0);
             texture->bind();
-            renderScene(simpleDepthShader, skyboxShader, cube, cube2, sphere, startPos);
+            renderScene(simpleDepthShader, cube, cube2, sphere, startPos, texture, grassAlbedo, false);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        // color id
+        glBindFramebuffer(GL_FRAMEBUFFER, state->idBuffer);
+        glViewport(0, 0, Window::_width, Window::_height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        colorIdShader.use();
+        colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
+        renderSceneId(colorIdShader, scene, cube, cube2, sphere, startPos);
+        glFlush();
+        glFinish();
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
         glViewport(0, 0, Window::_width, Window::_height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -394,24 +483,19 @@ void Window::startLoop()
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         shader.use();
         shader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
-
         glUniform3f(glGetUniformLocation(shader.mProgram, "viewPos"), state->camera->pos.x, state->camera->pos.y, state->camera->pos.z);
         glUniform3f(glGetUniformLocation(shader.mProgram, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
         shader.uniformMatrix(lightSpaceMatrix, "lightSpaceMatrix");
-        glActiveTexture(GL_TEXTURE0);
-        texture->bind();
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        renderScene(shader, skyboxShader, cube, cube2, sphere, startPos);
+        renderScene(shader, cube, cube2, sphere, startPos, texture, grassAlbedo, false);
 
         debugQuad.use();
-        debugQuad.setFloat(near_plane, "near_plane");
-        debugQuad.setFloat(far_plane, "far_plane");
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         //renderQuad();
 
-        /*glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
         skyboxTexture->bind();
         glm::mat4 model2 = glm::mat4(1.f);
@@ -422,7 +506,7 @@ void Window::startLoop()
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-        glDepthFunc(GL_LESS);*/
+        glDepthFunc(GL_LESS);
 
         glfwSwapBuffers(mainWindow);
         glfwPollEvents();
@@ -433,4 +517,3 @@ void Window::makeContextCurrent()
 {
     glfwMakeContextCurrent(mainWindow);
 }
-
