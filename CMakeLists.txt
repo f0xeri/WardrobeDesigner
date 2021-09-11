@@ -22,14 +22,14 @@ add_compile_options(
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11 -Wno-expansion-to-defined")
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(Threads REQUIRED)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/glew/build/cmake)
+set(OpenGL_GL_PREFERENCE GLVND)
+add_subdirectory(${PROJECT_SOURCE_DIR}/glew-cmake)
 add_subdirectory(${PROJECT_SOURCE_DIR}/glfw)
 
 set(SRC ${PROJECT_SOURCE_DIR}/src/main.cpp
