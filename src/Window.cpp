@@ -8,15 +8,15 @@
 #include <glm/ext.hpp>
 #include <sstream>
 #include "Window.h"
-#include "../Logger.hpp"
-#include "../ObjectLoader/ObjectLoader.h"
-#include "../Camera/Camera.h"
-#include "../Program/Program.hpp"
-#include "../Texture/Texture.hpp"
-#include "../Controls/Controls.h"
-#include "../Object/Cube.hpp"
-#include "../Object/Sphere.hpp"
-#include "../Scene/Scene.hpp"
+#include "Logger.hpp"
+#include "ObjectLoader.h"
+#include "Camera.h"
+#include "Program.hpp"
+#include "Texture.hpp"
+#include "Controls.h"
+#include "Object/Cube.hpp"
+#include "Object/Sphere.hpp"
+#include "Scene.hpp"
 
 State *state;
 Controls *controls;

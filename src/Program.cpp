@@ -5,7 +5,7 @@
 #include "Program.hpp"
 #include "GL/glew.h"
 #include "GL/gl.h"
-#include "../Logger.hpp"
+#include "Logger.hpp"
 #include <string>
 #include <fstream>
 #include <streambuf>

@@ -1,5 +1,5 @@
 #include <GLFW/glfw3.h>
-#include "Window/Window.h"
+#include "Window.h"
 
 int main() {
     Window mainWindow("FoxEngine", 1280, 720);

@@ -8,7 +8,7 @@
 #include <tuple>
 #include <cstring>
 #include "ObjectLoader.h"
-#include "../Logger.hpp"
+#include "Logger.hpp"
 
 std::tuple<std::vector<glm::fvec3>, std::vector<glm::fvec2>, std::vector<glm::fvec3>> ObjectLoader::load(
         const std::string &filename, glm::vec3 pos)

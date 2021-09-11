@@ -6,7 +6,7 @@
 #define LAB4B_SCENE_HPP
 
 #include <vector>
-#include "../Object/IObject.hpp"
+#include "Object/IObject.hpp"
 
 
 class Scene

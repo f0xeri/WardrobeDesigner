@@ -3,8 +3,8 @@
 //
 
 #include <glm/ext/scalar_constants.hpp>
-#include "Sphere.hpp"
-#include "../Logger.hpp"
+#include "Object/Sphere.hpp"
+#include "Logger.hpp"
 
 void Sphere::generateVAO() {
     forceVector = {0, -39.8, 0};

@@ -6,6 +6,7 @@
 #define LAB4B_WINDOW_H
 
 #include <string>
+#include "GLFW/glfw3.h"
 
 class Window
 {

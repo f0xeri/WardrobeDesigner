@@ -5,7 +5,7 @@
 #ifndef MINE_STATE_HPP
 #define MINE_STATE_HPP
 
-#include "Camera/Camera.h"
+#include "Camera.h"
 
 struct State
 {

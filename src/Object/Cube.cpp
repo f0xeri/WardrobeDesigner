@@ -2,7 +2,7 @@
 // Created by Yaroslav on 25.02.2021.
 //
 
-#include "Cube.hpp"
+#include "Object/Cube.hpp"
 
 void Cube::generateVAO() {
     std::vector<glm::vec3> cube = {

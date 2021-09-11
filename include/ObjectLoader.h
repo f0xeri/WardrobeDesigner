@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
-#include "../Model.h"
+#include "Model.h"
 
 class ObjectLoader
 {

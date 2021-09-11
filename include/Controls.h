@@ -5,7 +5,7 @@
 #ifndef MINE_CONTROLS_H
 #define MINE_CONTROLS_H
 
-#include "../State.hpp"
+#include "State.hpp"
 
 class Controls {
 public:

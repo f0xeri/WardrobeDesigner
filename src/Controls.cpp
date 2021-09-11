@@ -5,7 +5,7 @@
 #include <thread>
 #include <iostream>
 #include "Controls.h"
-#include "../Window/Window.h"
+#include "Window.h"
 
 State *localState;
 

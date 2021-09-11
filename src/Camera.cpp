@@ -4,7 +4,7 @@
 
 #include <glm/ext.hpp>
 #include "Camera.h"
-#include "../Window/Window.h"
+#include "Window.h"
 
 Camera::Camera(vec3 pos, float FOV) : pos(pos), FOV(FOV), rotation(1.0f)
 {
