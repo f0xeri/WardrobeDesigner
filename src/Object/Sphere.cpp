@@ -3,6 +3,7 @@
 //
 
 #include <glm/ext/scalar_constants.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include "Object/Sphere.hpp"
 #include "Logger.hpp"
 
@@ -140,6 +141,10 @@ void Sphere::draw() {
     }
 }
 
+void Sphere::applyTranslations() {
+    model = glm::translate(model, position - startPosition);
+}
+
 void Sphere::update(float dt, bool col, float y)
 {
     if (!physicsEnabled) return;
@@ -166,4 +171,5 @@ void Sphere::update(float dt, bool col, float y)
     {
         velocity.z = 0;
     }
+    applyTranslations();
 }

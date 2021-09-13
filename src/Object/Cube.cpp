@@ -5,6 +5,8 @@
 #include "Object/Cube.hpp"
 #include "Logger.hpp"
 
+#include <glm/ext/matrix_transform.hpp>
+
 void Cube::generateVAO() {
     std::vector<glm::vec3> cube = {
             // top
@@ -48,9 +50,9 @@ void Cube::generateVAO() {
     for (int i = 0; i < 6; ++i)
     {
         cubeTexCoords.insert(cubeTexCoords.end(), {
-                {0, 2048},
-                {2048, 2048},
-                {2048, 0},
+                {0, texScaleY},
+                {texScaleX, texScaleY},
+                {texScaleX, 0},
                 {0, 0}
         });
     }
@@ -125,6 +127,14 @@ void Cube::generateVAO() {
     mIndicesCount = cubeIndices.size();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, cubeIndices.size() * sizeof(unsigned), cubeIndices.data(), GL_STATIC_DRAW);
+}
+
+void Cube::applyTranslations() {
+    model = glm::translate(model, position - startPosition);
+}
+
+void Cube::update(float dt) {
+    applyTranslations();
 }
 
 void Cube::draw() {

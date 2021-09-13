@@ -23,7 +23,7 @@ Controls *controls;
 
 unsigned int nbFrames = 0;
 double lastTime;
-
+double dx, dy;
 
 float skyboxVertices[] = {
         -1.0f,  1.0f, -1.0f,
@@ -205,10 +205,10 @@ bool doesCubeIntersectSphere(Cube *cube, Sphere *sphere)
     return dist_squared > 0;
 }
 
-void renderScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere, vec3 startPos, Texture *texture, Texture *grassAlbedo, bool colorIdPass)
+void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
 {
     glActiveTexture(GL_TEXTURE0);
-    grassAlbedo->bind();
+    cube->texture->bind();
     glm::mat4 model = glm::mat4(1.0f);
     shader.uniformMatrix(model, "model");
     if (state->pickedObject == 0)
@@ -218,7 +218,7 @@ void renderScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere, vec3 s
     cube->draw();
 
     glActiveTexture(GL_TEXTURE0);
-    texture->bind();
+    cube2->texture->bind();
     model = glm::mat4(1.0f);
     shader.uniformMatrix(model, "model");
     if (state->pickedObject == 1)
@@ -241,56 +241,61 @@ void renderScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere, vec3 s
         sphere->update(state->deltaTime, false, 0.0);
     }
 
-    vec3 sphereTranslate = sphere->position - startPos;
+    vec3 sphereTranslate = sphere->position - sphere->startPosition;
     model = glm::mat4(1.0f);
     model = glm::translate(model, sphereTranslate);
     shader.uniformMatrix(model, "model");
     if (state->pickedObject == 2)
+    {
+        // с этим условием получаются рывки, если пытаться сделать норм скорость
+        // без - объект продолжает двигаться даже если не двигать мышкой, ибо сохраняется последние данные deltaX и deltaY
+        if (state->x - dx != 0 || state->y - dy != 0)
+        {
+            sphere->position.x += state->deltaX * state->deltaTime;
+            sphere->position.z += state->deltaY * state->deltaTime;
+
+            sphereTranslate = sphere->position - sphere->startPosition;
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, sphereTranslate);
+            shader.uniformMatrix(model, "model");
+        }
         shader.setInt(1, "isPicked");
+    }
     else
         shader.setInt(0, "isPicked");
     sphere->draw();
 }
 
-void renderSceneId(Shader &shader, Scene *scene, Cube *cube, Cube *cube2, Sphere *sphere, vec3 startPos)
+void renderScene(Shader &shader, Scene *scene)
 {
-    /*for (int i = 0; i < scene->objects.size(); i++)
+    glActiveTexture(GL_TEXTURE0);
+    for (size_t i = 0; i < scene->objects.size(); i++)
     {
+        scene->objects[i]->update(state->deltaTime);
+        shader.uniformMatrix(scene->objects[i]->model, "model");
+        if (state->pickedObject == i)
+            shader.setInt(1, "isPicked");
+        else
+            shader.setInt(0, "isPicked");
+        scene->objects[i]->texture->bind();
+        scene->objects[i]->draw();
+    }
+}
+
+void renderSceneId(Shader &shader, Scene *scene)
+{
+    for (int i = 0; i < scene->objects.size(); i++)
+    {
+        /*vec3 objPosTranslate = scene->objects[i]->position - scene->objects[i]->startPosition;
         glm::mat4 model = glm::mat4(1.0f);
-        shader.uniformMatrix(model, "model");
+        model = glm::translate(model, objPosTranslate);*/
+        shader.uniformMatrix(scene->objects[i]->model, "model");
         int r = (i & 0x000000FF) >>  0;
         int g = (i & 0x0000FF00) >>  8;
         int b = (i & 0x00FF0000) >> 16;
         glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
         scene->objects[i]->draw();
-    }*/
-
-    glm::mat4 model = glm::mat4(1.0f);
-    shader.uniformMatrix(model, "model");
-    int r = (0 & 0x000000FF) >>  0;
-    int g = (0 & 0x0000FF00) >>  8;
-    int b = (0 & 0x00FF0000) >> 16;
-    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-    cube->draw();
-
-    model = glm::mat4(1.0f);
-    shader.uniformMatrix(model, "model");
-    r = (1 & 0x000000FF) >>  0;
-    g = (1 & 0x0000FF00) >>  8;
-    b = (1 & 0x00FF0000) >> 16;
-    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-    cube2->draw();
-
-    model = glm::mat4(1.0f);
-    vec3 sphereTranslate = sphere->position - startPos;
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, sphereTranslate);
-    shader.uniformMatrix(model, "model");
-    r = (2 & 0x000000FF) >>  0;
-    g = (2 & 0x0000FF00) >>  8;
-    b = (2 & 0x00FF0000) >> 16;
-    glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-    sphere->draw();
+    }
 }
 
 unsigned int quadVAO = 0;
@@ -322,57 +327,145 @@ void renderQuad()
     glBindVertexArray(0);
 }
 
+long double operator "" _mm(long double mm)
+{
+    return mm / 320.0f;
+}
+
+long double operator "" _mm(unsigned long long mm)
+{
+    return mm / 320.0f;
+}
+
+
 void Window::startLoop()
 {
     glEnable(GL_DEPTH_TEST);
     ObjectLoader loader;
-
-    Cube *cube = new Cube({0, 0, 0}, {2048, 1, 2048});
-    cube->physicsEnabled = true;
-    cube->collisionEnabled = true;
-    cube->generateVAO();
-
-    Cube *cube2 = new Cube({750, 3, 750}, {5, 1, 5});
-    cube2->physicsEnabled = true;
-    cube2->collisionEnabled = true;
-    cube2->generateVAO();
-
-    glm::vec3 startPos{748, 15, 748};
-    Sphere *sphere = new Sphere(startPos, 1.0f);
-    sphere->physicsEnabled = true;
-    sphere->collisionEnabled = true;
-    sphere->velocity = {2, 0, 2};
-    sphere->generateVAO();
-
-    vec3 lightPos(730.0f, 15.0f, 730.0f);
-
-    auto skybox = genSkyboxVAO();
-
-    Scene *scene = new Scene();
-    scene->addObject(cube);
-    scene->addObject(cube2);
-    scene->addObject(sphere);
-    state->scene = scene;
-
-    glEnable(GL_DEPTH_TEST);
-    state->camera = new Camera(glm::vec3(750.0f, 15.0f, 800.0f), radians(60.0f));
 
     Texture *texture = new Texture("res/textures/cube.jpg");
 
     Texture *grassAlbedo = new Texture("res/textures/grass_material/grass1-albedo3.png");
     grassAlbedo->loadTexture();
 
+    Texture *floorTexture = new Texture("res/textures/floor.jpg");
+    floorTexture->loadTexture();
+
+    Texture *woodTexture = new Texture("res/textures/woodTexture.jpg");
+    woodTexture->loadTexture();
 
     Texture *skyboxTexture = new Texture("skybox");
     std::vector<std::string> faces
-    {
-        "res/textures/right.jpg",
-        "res/textures/left.jpg",
-        "res/textures/top.jpg",
-        "res/textures/bottom.jpg",
-        "res/textures/front.jpg",
-        "res/textures/back.jpg"
-    };
+            {
+                    "res/textures/right.jpg",
+                    "res/textures/left.jpg",
+                    "res/textures/top.jpg",
+                    "res/textures/bottom.jpg",
+                    "res/textures/front.jpg",
+                    "res/textures/back.jpg"
+            };
+
+    /*Cube *cube = new Cube({0, 0, 0}, {2048, 1, 2048});
+    cube->physicsEnabled = true;
+    cube->collisionEnabled = true;
+    cube->texture = grassAlbedo;
+    cube->generateVAO();
+    Cube *cube2 = new Cube({750, 3, 750}, {5, 1, 5});
+    cube2->physicsEnabled = true;
+    cube2->collisionEnabled = true;
+    cube2->texture = texture;
+    cube2->generateVAO();
+    glm::vec3 startPos{748, 15, 748};
+    Sphere *sphere = new Sphere(startPos, 1.0f);
+    sphere->physicsEnabled = true;
+    sphere->collisionEnabled = true;
+    sphere->velocity = {2, 0, 2};
+    sphere->texture = texture;
+    sphere->generateVAO();*/
+
+    Cube *floor = new Cube({-10, -1, -10}, {20, 1, 20});
+    floor->texture = floorTexture;
+    floor->texScaleX = floor->texScaleY = 8;
+    floor->generateVAO();
+
+    Cube *bottomSide = new Cube({0, 0, -600_mm}, {1500_mm, 132_mm, 600_mm});
+    bottomSide->texture = woodTexture;
+    bottomSide->texScaleX = 4;
+    bottomSide->texScaleY = 1;
+    bottomSide->generateVAO();
+
+    Cube *backSide = new Cube({0, 0, 0}, {1500_mm, 2400_mm, 16_mm});
+    backSide->texture = woodTexture;
+    backSide->texScaleX = 4;
+    backSide->texScaleY = 1;
+    backSide->generateVAO();
+
+    Cube *topSide = new Cube({16_mm, 2384_mm, -600_mm}, {1468_mm, 16_mm, 600_mm});
+    topSide->texture = woodTexture;
+    topSide->texScaleX = 2;
+    topSide->texScaleY = 2;
+    topSide->generateVAO();
+
+    Cube *leftSide = new Cube({0, 132_mm, -600_mm}, {16_mm, 2268_mm, 600_mm});
+    leftSide->texture = woodTexture;
+    leftSide->texScaleX = 2;
+    leftSide->texScaleY = 2;
+    leftSide->generateVAO();
+
+    Cube *rightSide = new Cube({1484_mm, 132_mm, -600_mm}, {16_mm, 2268_mm, 600_mm});
+    rightSide->texture = woodTexture;
+    rightSide->texScaleX = 2;
+    rightSide->texScaleY = 2;
+    rightSide->generateVAO();
+
+    Cube *centerSide = new Cube({726_mm, 132_mm, -600_mm}, {16_mm, 1851_mm, 600_mm});
+    centerSide->texture = woodTexture;
+    centerSide->texScaleX = 2;
+    centerSide->texScaleY = 2;
+    centerSide->generateVAO();
+
+    Cube *shellMainLow = new Cube({16_mm, 2.4, -600_mm}, {3.9, 16_mm, 600_mm});
+    shellMainLow->texture = woodTexture;
+    shellMainLow->texScaleX = 2;
+    shellMainLow->texScaleY = 2;
+    shellMainLow->generateVAO();
+
+    Cube *shellMainHigh = new Cube({16_mm, 1983_mm, -600_mm}, {1468_mm, 16_mm, 600_mm});
+    shellMainHigh->texture = woodTexture;
+    shellMainHigh->texScaleX = 2;
+    shellMainHigh->texScaleY = 2;
+    shellMainHigh->generateVAO();
+
+    Cube *shellHalfLeft1 = new Cube({0, 3.4, -1.45}, {1.95, 16_mm, 600_mm});
+    shellHalfLeft1->texture = woodTexture;
+    shellHalfLeft1->texScaleX = 2;
+    shellHalfLeft1->texScaleY = 2;
+    shellHalfLeft1->generateVAO();
+
+    //vec3 lightPos(730.0f, 15.0f, 730.0f);
+    vec3 lightPos(15.0f, 25.0f, -20.0f);
+
+    auto skybox = genSkyboxVAO();
+
+    Scene *scene = new Scene();
+    /*scene->addObject(cube);
+    scene->addObject(cube2);
+    scene->addObject(sphere);*/
+    scene->addObject(floor);
+    scene->addObject(bottomSide);
+    scene->addObject(backSide);
+    scene->addObject(topSide);
+    scene->addObject(leftSide);
+    scene->addObject(rightSide);
+    scene->addObject(centerSide);
+    //scene->addObject(shellMainLow);
+    scene->addObject(shellMainHigh);
+    //scene->addObject(shellHalfLeft1);
+    state->scene = scene;
+
+    glEnable(GL_DEPTH_TEST);
+    state->camera = new Camera(glm::vec3(-20.0f, 15.0f, -20.0f), radians(60.0f));
+
     unsigned int cubemapTexture = skyboxTexture->loadCubemap(faces);
     texture->loadTexture();
 
@@ -403,7 +496,7 @@ void Window::startLoop()
     unsigned int idColor;
     glGenTextures(1, &idColor);
     glBindTexture(GL_TEXTURE_2D, idColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, idColor, 0);
@@ -437,16 +530,15 @@ void Window::startLoop()
         double currentTime = glfwGetTime();
         state->deltaTime = glfwGetTime() - lastTime;
         lastTime = currentTime;
-
+        glfwGetCursorPos(mainWindow, &dx, &dy);
+        //state->deltaX = state->deltaY = 0;
         updateInputs(mainWindow);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
         float near_plane = 1.0f, far_plane = 80.5f;
         lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-        lightView = glm::lookAt(lightPos, glm::vec3(750.0f, 0.0f, 750.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightView = glm::lookAt(lightPos, glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
         // render scene from light's point of view
         simpleDepthShader.use();
@@ -455,25 +547,25 @@ void Window::startLoop()
         glViewport(0, 0,  SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
             glClear(GL_DEPTH_BUFFER_BIT);
-
             glActiveTexture(GL_TEXTURE0);
             texture->bind();
-            renderScene(simpleDepthShader, cube, cube2, sphere, startPos, texture, grassAlbedo, false);
+        renderScene(simpleDepthShader, scene);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // color id
         glBindFramebuffer(GL_FRAMEBUFFER, state->idBuffer);
         glViewport(0, 0, Window::_width, Window::_height);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         colorIdShader.use();
         colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
-        renderSceneId(colorIdShader, scene, cube, cube2, sphere, startPos);
-        glFlush();
-        glFinish();
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        renderSceneId(colorIdShader, scene);
+        //glFlush();
+        //glFinish();
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        //glReadBuffer(GL_COLOR_ATTACHMENT0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
@@ -488,7 +580,7 @@ void Window::startLoop()
         shader.uniformMatrix(lightSpaceMatrix, "lightSpaceMatrix");
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        renderScene(shader, cube, cube2, sphere, startPos, texture, grassAlbedo, false);
+        renderScene(shader, scene);
 
         debugQuad.use();
         glActiveTexture(GL_TEXTURE0);
