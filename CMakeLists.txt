@@ -39,6 +39,24 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/gl
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/glfw/include)
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/glm)
 
+#imgui integration 
+set(IMGUI_INCLUDE   ${PROJECT_SOURCE_DIR}/imgui/backends
+                    ${PROJECT_SOURCE_DIR}/imgui)
+
+
+
+set(IMGUI_SRC       ${PROJECT_SOURCE_DIR}/imgui/imgui_draw.cpp
+                    ${PROJECT_SOURCE_DIR}/imgui/imgui_tables.cpp
+                    ${PROJECT_SOURCE_DIR}/imgui/imgui_widgets.cpp
+                    ${PROJECT_SOURCE_DIR}/imgui/imgui.cpp
+                    ${PROJECT_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
+                    ${PROJECT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp)
+
+
+add_library(imgui STATIC ${IMGUI_SRC})
+target_include_directories(imgui PUBLIC ${IMGUI_INCLUDE})
+
+
 target_link_libraries(${CMAKE_PROJECT_NAME} Threads::Threads)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_LIBRARIES})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${GLFW_LIBRARIES})
@@ -46,5 +64,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${OPENGL_LIBRARY})
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw)
 target_link_libraries(${CMAKE_PROJECT_NAME} libglew_static)
 
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${IMGUI_INCLUDE})
+target_link_libraries(${CMAKE_PROJECT_NAME} imgui)
 
 
