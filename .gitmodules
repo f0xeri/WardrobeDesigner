@@ -4,6 +4,12 @@
 [submodule "glew-cmake"]
 	path = glew-cmake
 	url = https://github.com/Perlmint/glew-cmake.git
+<<<<<<< HEAD
 [submodule "imgui"]
 	path = imgui
 	url = https://github.com/ocornut/imgui.git
+=======
+[submodule "glm"]
+	path = glm
+	url = https://github.com/g-truc/glm.git
+>>>>>>> aeb5065d7b4ffb5bfd986c68760153fe4c6df960
