@@ -23,6 +23,7 @@ public:
     std::vector<int> lineIndices;
 
     void generateVAO() override;
+    void applyTranslations() override;
     void draw() override;
 
     Sphere(glm::vec3 position, float radius) : IObject(position), radius(radius) {}

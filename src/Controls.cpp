@@ -66,6 +66,7 @@ void updateInputs(GLFWwindow *window)
 
 void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 {
+    localState->deltaX = localState->deltaY = 0.0f;
     if (localState->cursor_started){
         localState->deltaX += xpos - localState->x;
         localState->deltaY += ypos - localState->y;
@@ -88,7 +89,18 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
         localState->camera->rotation = mat4(1.0f);
         localState->camera->rotate(localState->camY, localState->camX, 0);
     }
-    localState->deltaX = localState->deltaY = 0.0f;
+
+    // работает не совсем так, как хотелось бы, поэтому не стал юзать
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        localState->dragEnabled = true;
+    }
+    else
+    {
+        localState->dragEnabled = false;
+    }
+    //LOG(localState->deltaX << " " << localState->deltaY << " " << localState->cursor_started)
+
 }
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
@@ -104,13 +116,16 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
         localState->pickedObject = pickedID;
     }
+    else
+    {
+        localState->pickedObject = -1;
+    }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
 
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 
 void resizeCallback(GLFWwindow *window, int width, int height)
 {

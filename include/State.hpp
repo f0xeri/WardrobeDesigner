@@ -22,21 +22,20 @@ struct State
     float y = 0.0f;
     unsigned int idBuffer;
     unsigned int pickedObject = -1;
+    bool dragEnabled = false;
     bool cursor_locked = false;
     bool cursor_started = false;
     bool show_debug = false;
-    bool show_inventory = false;
 
     float camX = 0.0f;
     float camY = 0.0f;
-
     bool vsync = false;
 
     int nbFrames = 0;
     bool showPolygons = false;
 
     double lastTime;
-    int currentBlockId = 0;
 };
+
 
 #endif //MINE_STATE_HPP

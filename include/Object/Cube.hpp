@@ -15,8 +15,11 @@ public:
     glm::vec3 Bmin, Bmax;
 
     void generateVAO() override;
+    void applyTranslations() override;
+    void update(float dt) override;
     void draw() override;
 };
+
 
 
 #endif //LAB4B_CUBE_HPP

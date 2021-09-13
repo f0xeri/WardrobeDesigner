@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <tuple>
+#include "Texture.hpp"
+
 
 struct VertexVectorStruct
 {
@@ -21,13 +23,19 @@ public:
 class IObject
 {
 public:
-    IObject(glm::vec3 position) : position(position) {};
+    IObject(glm::vec3 position) : position(position), startPosition(position), model(glm::mat4(1.0f)) {};
     glm::vec3 position;
+    glm::vec3 startPosition;
+    glm::mat4 model;
+    Texture *texture;
+    int texScaleX = 1;
+    int texScaleY = 1;
     VertexVectorStruct objectData;
     GLuint VAO{};
 
     virtual void generateVAO() {};
     virtual void update(float dt) {};
+    virtual void applyTranslations() {};
     virtual void draw() {};
 
     bool physicsEnabled = false;
@@ -37,6 +45,5 @@ public:
     unsigned mIndicesBuffer = 0;
     size_t mIndicesCount = 0;
 };
-
 
 #endif //LAB4B_BASEOBJECT_HPP
