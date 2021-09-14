@@ -7,6 +7,7 @@
 #include <tuple>
 #include <glm/ext.hpp>
 #include <sstream>
+#include <GUIRenderer.hpp>
 #include "Window.h"
 #include "Logger.hpp"
 #include "ObjectLoader.h"
@@ -342,6 +343,7 @@ void Window::startLoop()
 {
     glEnable(GL_DEPTH_TEST);
     ObjectLoader loader;
+    GUIRenderer gui(mainWindow);
 
     Texture *texture = new Texture("res/textures/cube.jpg");
 
@@ -599,6 +601,8 @@ void Window::startLoop()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
+
+        gui.render(state);
 
         glfwSwapBuffers(mainWindow);
         glfwPollEvents();

@@ -25,7 +25,7 @@ struct State
     bool dragEnabled = false;
     bool cursor_locked = false;
     bool cursor_started = false;
-    bool show_debug = false;
+    bool showDebug = true;
 
     float camX = 0.0f;
     float camY = 0.0f;
