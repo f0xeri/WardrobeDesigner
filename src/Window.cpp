@@ -24,7 +24,6 @@ Controls *controls;
 
 unsigned int nbFrames = 0;
 double lastTime;
-double dx, dy;
 
 float skyboxVertices[] = {
         -1.0f,  1.0f, -1.0f,
@@ -268,7 +267,7 @@ void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
     {
         // с этим условием получаются рывки, если пытаться сделать норм скорость
         // без - объект продолжает двигаться даже если не двигать мышкой, ибо сохраняется последние данные deltaX и deltaY
-        if (state->x - dx != 0 || state->y - dy != 0)
+        if (state->x - state->dx != 0 || state->y - state->dy != 0)
         {
             sphere->position.x += state->deltaX * state->deltaTime;
             sphere->position.z += state->deltaY * state->deltaTime;
@@ -289,8 +288,9 @@ void renderScene(Shader &shader, Scene *scene)
 {
     glActiveTexture(GL_TEXTURE0);
     glm::vec3 ray_start = state->camera->pos;
-    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(dx, dy);
+    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
     glm::vec3 ray_end = ray_start + ray_dir * 50.0f;
+    glm::vec3 hit;
 
     glLineWidth(2.5);
     glColor3f(1.0, 0.0, 0.0);
@@ -299,17 +299,8 @@ void renderScene(Shader &shader, Scene *scene)
     glVertex3f(ray_end.x, ray_end.y, ray_end.z);
     glEnd();
 
-    bool result = false;
     for (size_t i = 0; i < scene->objects.size(); i++)
     {
-        if (state->pickedObject != -1)
-        {
-            float hx, hy;
-            result = doesRayIntersectCube(ray_start, ray_dir, scene->objects[state->pickedObject], hx, hy);
-            //if (result)
-                //LOG(hx << " " << hy);
-            LOG(state->pickedObject << " " << result)
-        }
         scene->objects[i]->update(state, i);
         shader.uniformMatrix(scene->objects[i]->model, "model");
         if (state->pickedObject == i)
@@ -571,7 +562,7 @@ void Window::startLoop()
         double currentTime = glfwGetTime();
         state->deltaTime = glfwGetTime() - lastTime;
         lastTime = currentTime;
-        glfwGetCursorPos(mainWindow, &dx, &dy);
+        glfwGetCursorPos(mainWindow, &state->dx, &state->dy);
         //state->deltaX = state->deltaY = 0;
         updateInputs(mainWindow);
 
@@ -641,6 +632,8 @@ void Window::startLoop()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
+
+        state->lmbClicked = false;
 
         gui.render(state);
 

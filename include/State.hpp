@@ -18,10 +18,13 @@ struct State
     float deltaX = 0.0f;
     float deltaY = 0.0f;
 
+    double dx, dy;
+
     float x = 0.0f;
     float y = 0.0f;
     unsigned int idBuffer;
     unsigned int pickedObject = -1;
+    bool lmbClicked = false;
     bool dragEnabled = false;
     bool cursor_locked = false;
     bool cursor_started = false;
