@@ -4,6 +4,7 @@
 
 #include "Object/Cube.hpp"
 #include "Logger.hpp"
+#include "State.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 
@@ -133,7 +134,9 @@ void Cube::applyTranslations() {
     model = glm::translate(model, position - startPosition);
 }
 
-void Cube::update(float dt) {
+void Cube::update(State *state, size_t currentId) {
+    //if (state->pickedObject == currentId)
+        //state->camera->raycastFromViewportCoords(state->x, state->y);
     applyTranslations();
 }
 

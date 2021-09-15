@@ -3,3 +3,14 @@ emo.png
 res
 FoxEngine
 /.vscode/
+/build-release/CMakeFiles/
+/build-release/glew-cmake/
+/build-release/glfw/
+/build-release/cmake_install.cmake
+/build-release/CMakeCache.txt
+/build-release/CMakeDoxyfile.in
+/build-release/CMakeDoxygenDefaults.cmake
+/build-release/FoxEngine.cbp
+/build-release/libimgui.a
+/build-release/Makefile
+/build-debug/

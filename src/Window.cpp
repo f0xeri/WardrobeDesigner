@@ -206,6 +206,24 @@ bool doesCubeIntersectSphere(Cube *cube, Sphere *sphere)
     return dist_squared > 0;
 }
 
+bool doesRayIntersectCube(glm::vec3 ray_start, glm::vec3 dir, IObject *cube, float &htmin, float &htmax)
+{
+    Cube *ncube = dynamic_cast<Cube *>(cube);
+    //glm::vec3 dir = ray_end - ray_start;
+    glm::vec3 invDir = -dir;
+    glm::vec3 tbot = invDir * (ncube->Bmin - ray_start);
+    glm::vec3 ttop = invDir * (ncube->Bmax - ray_start);
+    glm::vec3 tmin = min(ttop, tbot);
+    glm::vec3 tmax = max(ttop, tbot);
+    glm::vec2 t = max(vec2(tmin.x, tmin.x), vec2(tmin.y, tmin.z));
+    float t0 = max(t.x, t.y);
+    t = min(vec2(tmax.x, tmax.x), vec2(tmax.y, tmax.z));
+    float t1 = min(t.x, t.y);
+    htmin = t0;
+    htmax = t1;
+    return t1 > max(t0, 0.0f);
+}
+
 void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
 {
     glActiveTexture(GL_TEXTURE0);
@@ -270,9 +288,29 @@ void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
 void renderScene(Shader &shader, Scene *scene)
 {
     glActiveTexture(GL_TEXTURE0);
+    glm::vec3 ray_start = state->camera->pos;
+    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(dx, dy);
+    glm::vec3 ray_end = ray_start + ray_dir * 50.0f;
+
+    glLineWidth(2.5);
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINES);
+    glVertex3f(ray_start.x, ray_start.y, ray_start.z);
+    glVertex3f(ray_end.x, ray_end.y, ray_end.z);
+    glEnd();
+
+    bool result = false;
     for (size_t i = 0; i < scene->objects.size(); i++)
     {
-        scene->objects[i]->update(state->deltaTime);
+        if (state->pickedObject != -1)
+        {
+            float hx, hy;
+            result = doesRayIntersectCube(ray_start, ray_dir, scene->objects[state->pickedObject], hx, hy);
+            //if (result)
+                //LOG(hx << " " << hy);
+            LOG(state->pickedObject << " " << result)
+        }
+        scene->objects[i]->update(state, i);
         shader.uniformMatrix(scene->objects[i]->model, "model");
         if (state->pickedObject == i)
             shader.setInt(1, "isPicked");
@@ -281,6 +319,7 @@ void renderScene(Shader &shader, Scene *scene)
         scene->objects[i]->texture->bind();
         scene->objects[i]->draw();
     }
+    //LOG("")
 }
 
 void renderSceneId(Shader &shader, Scene *scene)
@@ -583,6 +622,7 @@ void Window::startLoop()
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         renderScene(shader, scene);
+
 
         debugQuad.use();
         glActiveTexture(GL_TEXTURE0);

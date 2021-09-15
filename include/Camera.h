@@ -29,6 +29,7 @@ public:
     mat4 getProjectionMatrix();
     mat4 getViewMatrix();
     void rotate(float x, float y, float z);
+    vec3 raycastFromViewportCoords(double x, double y);
 };
 
 

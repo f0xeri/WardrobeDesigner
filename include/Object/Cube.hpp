@@ -16,7 +16,7 @@ public:
 
     void generateVAO() override;
     void applyTranslations() override;
-    void update(float dt) override;
+    void update(State *state, size_t currentId) override;
     void draw() override;
 };
 

@@ -115,6 +115,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         glReadPixels(x, Window::_height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
         localState->pickedObject = pickedID;
+
     }
     else
     {

@@ -11,6 +11,7 @@
 #include <tuple>
 #include "Texture.hpp"
 
+struct State;
 
 struct VertexVectorStruct
 {
@@ -34,7 +35,7 @@ public:
     GLuint VAO{};
 
     virtual void generateVAO() {};
-    virtual void update(float dt) {};
+    virtual void update(State *state, size_t currentId) {};
     virtual void applyTranslations() {};
     virtual void draw() {};
 
