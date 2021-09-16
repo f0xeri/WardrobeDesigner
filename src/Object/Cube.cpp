@@ -7,6 +7,7 @@
 #include "State.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/intersect.hpp>
 
 void Cube::generateVAO() {
     std::vector<glm::vec3> cube = {
@@ -43,8 +44,8 @@ void Cube::generateVAO() {
             {0 + position.x, size.y + position.y, 0 + position.z}
     };
 
-    Bmin = {position.x, position.y, position.z};
-    Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
+    //Bmin = {position.x, position.y, position.z};
+    //Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
 
     std::vector<glm::vec2> cubeTexCoords;
     cubeTexCoords.reserve(6);
@@ -177,22 +178,37 @@ bool checkRayCubeIntercection(vec3 B1, vec3 B2, vec3 L1, vec3 L2, vec3 &Hit)
 
 vec3 delta;
 
-void Cube::update(State *state, size_t currentId) {
+void Cube::start_move(State *state)
+{
+    glm::vec3 ray_start = state->camera->pos;
+    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
+    glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
+    glm::vec3 hit;
+    glm::vec3 Bmin, Bmax;
     Bmin = {position.x, position.y, position.z};
     Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
-    if (state->pickedObject == currentId)
+    bool result = checkRayCubeIntercection(Bmin, Bmax, ray_start, ray_end, hit);
+    origin_offset = hit - position;
+    movement_plane.origin = hit;
+    movement_plane.normal = glm::normalize(ray_start - hit);
+    picked = true;
+}
+
+void Cube::end_move()
+{
+    picked = false;
+}
+
+void Cube::update(State *state, size_t currentId) {
+    
+    if (picked)
     {
         glm::vec3 ray_start = state->camera->pos;
-        glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
-        glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
-        glm::vec3 hit;
-
-        bool result = checkRayCubeIntercection(Bmin, Bmax, ray_start, ray_end, hit);
-        if (result)
-        {
-            if (state->lmbClicked) delta = hit - position;
-        }
-        position.x = hit.x - delta.x;
+        glm::vec3 ray_dir = glm::normalize(state->camera->raycastFromViewportCoords(state->x, state->y));
+        float intersect_distance = 0;
+        glm::intersectRayPlane(ray_start,ray_dir,movement_plane.origin,movement_plane.normal,intersect_distance);
+        glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
+        position = intersect_pos - origin_offset;
 
         //if (result) LOG(currentId << " " << result << " " << position.x << " " << position.y << " " << position.z)
     }

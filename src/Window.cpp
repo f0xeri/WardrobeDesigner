@@ -191,6 +191,7 @@ GLuint genSkyboxVAO()
 }
 
 inline float squared(float v) { return v * v; }
+/*
 bool doesCubeIntersectSphere(Cube *cube, Sphere *sphere)
 {
     if (!cube->collisionEnabled || !sphere->collisionEnabled) return false;
@@ -282,7 +283,7 @@ void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
     else
         shader.setInt(0, "isPicked");
     sphere->draw();
-}
+}*/
 
 void renderScene(Shader &shader, Scene *scene)
 {
