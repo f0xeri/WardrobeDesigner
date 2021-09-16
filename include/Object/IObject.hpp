@@ -28,6 +28,11 @@ public:
     glm::vec3 position;
     glm::vec3 startPosition;
     glm::mat4 model;
+    struct plane_t
+    {
+        glm::vec3 origin;
+        glm::vec3 normal;
+    } movement_plane;
     Texture *texture;
     int texScaleX = 1;
     int texScaleY = 1;
@@ -38,6 +43,9 @@ public:
     virtual void update(State *state, size_t currentId) {};
     virtual void applyTranslations() {};
     virtual void draw() {};
+    
+    virtual void start_move(State *state) {};
+    virtual void end_move() {};
 
     bool physicsEnabled = false;
     bool collisionEnabled = false;
