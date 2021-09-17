@@ -116,16 +116,11 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
         localState->pickedObject = pickedID;
         localState->scene->objects[pickedID]->start_move(localState);
-        //localState->lmbClicked = true;
     }
     else
     {
         localState->scene->objects[localState->pickedObject]->end_move();
         localState->pickedObject = -1;
-    }
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-    {
-
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

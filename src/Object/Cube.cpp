@@ -188,9 +188,14 @@ void Cube::start_move(State *state)
     Bmin = {position.x, position.y, position.z};
     Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
     bool result = checkRayCubeIntercection(Bmin, Bmax, ray_start, ray_end, hit);
-    origin_offset = hit - position;
-    movement_plane.origin = hit;
-    movement_plane.normal = glm::normalize(ray_start - hit);
+    
+    
+    movement_plane.origin = vec3(0,0,0);
+    movement_plane.normal = vec3(0,0,1);
+    float intersect_distance = 0;
+    glm::intersectRayPlane(ray_start,ray_dir,movement_plane.origin,movement_plane.normal,intersect_distance);
+    glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
+    origin_offset = intersect_pos - position;
     picked = true;
 }
 
@@ -208,7 +213,7 @@ void Cube::update(State *state, size_t currentId) {
         float intersect_distance = 0;
         glm::intersectRayPlane(ray_start,ray_dir,movement_plane.origin,movement_plane.normal,intersect_distance);
         glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
-        position = intersect_pos - origin_offset;
+        position.x = (intersect_pos - origin_offset).x;
 
         //if (result) LOG(currentId << " " << result << " " << position.x << " " << position.y << " " << position.z)
     }
