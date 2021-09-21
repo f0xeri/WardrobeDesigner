@@ -429,7 +429,7 @@ void Window::startLoop()
         state->deltaTime = glfwGetTime() - lastTime;
         lastTime = currentTime;
         glfwGetCursorPos(mainWindow, &state->dx, &state->dy);
-        //state->deltaX = state->deltaY = 0;
+
         updateInputs(mainWindow);
 
         glm::mat4 lightProjection, lightView;
@@ -455,6 +455,8 @@ void Window::startLoop()
         glViewport(0, 0, Window::_width, Window::_height);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindTexture(GL_TEXTURE_2D, idColor);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, nullptr);
         colorIdShader.use();
         colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
         renderSceneId(colorIdShader, scene);

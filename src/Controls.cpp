@@ -112,6 +112,12 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         unsigned char data[4];
         double x, y;
         glfwGetCursorPos(window, &x, &y);
+        // Do nothing if user clicked on GUI
+        if (x > Window::_width - Window::_width / 6.0f)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            return;
+        }
         glReadPixels(x, Window::_height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
         localState->pickedObject = pickedID;
@@ -129,7 +135,8 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
     {
         if (localState->pickedObject != -1)
             localState->scene->objects[localState->pickedObject]->end_move();
-        localState->pickedObject = -1;
+        // If we set pickedObject to -1 here, object will be unpicked on left mouse button release
+        //localState->pickedObject = -1;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
