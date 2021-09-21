@@ -7,6 +7,7 @@
 
 #include "Camera.h"
 #include "Scene.hpp"
+#include "WardrobeGenerator.hpp"
 
 struct State
 {
@@ -15,6 +16,8 @@ struct State
     GLFWwindow *window;
     Camera *camera;
     Scene *scene;
+    WardrobeGenerator *wardrobeGenerator;
+
     float deltaX = 0.0f;
     float deltaY = 0.0f;
 
@@ -23,8 +26,8 @@ struct State
     float x = 0.0f;
     float y = 0.0f;
     unsigned int idBuffer;
-    unsigned int pickedObject = -1;
-    bool lmbClicked = false;
+    long long pickedObject = -1;
+
     bool dragEnabled = false;
     bool cursor_locked = false;
     bool cursor_started = false;

@@ -38,40 +38,18 @@ public:
         ImGui::End();
     }
 
-    /*void renderInventory(State *state)
+    void renderSettings(State *state)
     {
-        ImGuiWindowFlags window_flags = 0;
-        window_flags |= ImGuiWindowFlags_NoBackground;
-        window_flags |= ImGuiWindowFlags_NoTitleBar;
-        window_flags |= ImGuiWindowFlags_NoResize;
-        ImGui::SetNextWindowPos({Window::_width / 2.0f - 80, Window::_height - (Window::_height / 12.0f)});
-        ImGui::SetNextWindowSize({160, 60}, ImGuiCond_Once);
-        ImGui::Begin("Inventory", &state->showInventory, window_flags);
-        std::stringstream ss;
-        switch (state->currentBlockId)
-        {
-            case 0:
-                ss << "Air";
-                break;
-            case 1:
-                ss << "Stone";
-                break;
-            case 2:
-                ss << "Sand";
-                break;
-            case 3:
-                ss << "Grass";
-                break;
-            case 6:
-                ss << "Bricks";
-                break;
-        }
-        ImGui::SetWindowFontScale(1.8f);
-        float font_size = ImGui::GetFontSize() * ss.str().size() / 2;
-        ImGui::SameLine(ImGui::GetWindowSize().x / 2 - font_size + (font_size / 2));
-        ImGui::Text("%s", ss.str().c_str());
+        ImGui::Begin("Settings");
+        ImGui::Text("Wardrobe edges");
+        ImGui::Checkbox("Bottom", &state->wardrobeGenerator->bottomSide->enabled);
+        ImGui::Checkbox("Back", &state->wardrobeGenerator->backSide->enabled);
+        ImGui::Checkbox("Top", &state->wardrobeGenerator->topSide->enabled);
+        ImGui::Checkbox("Left", &state->wardrobeGenerator->leftSide->enabled);
+        ImGui::Checkbox("Right", &state->wardrobeGenerator->rightSide->enabled);
         ImGui::End();
-    }*/
+    }
+
 
     /*void renderRendererSettings(State *state)
     {

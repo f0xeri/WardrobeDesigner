@@ -8,6 +8,7 @@
 #include <glm/ext.hpp>
 #include <sstream>
 #include <GUIRenderer.hpp>
+#include <WardrobeGenerator.hpp>
 #include "Window.h"
 #include "Logger.hpp"
 #include "ObjectLoader.h"
@@ -190,115 +191,9 @@ GLuint genSkyboxVAO()
     return skyboxVAO;
 }
 
-inline float squared(float v) { return v * v; }
-/*
-bool doesCubeIntersectSphere(Cube *cube, Sphere *sphere)
-{
-    if (!cube->collisionEnabled || !sphere->collisionEnabled) return false;
-
-    float dist_squared = sphere->radius * sphere->radius;
-    if (sphere->position.x < cube->Bmin.x) dist_squared -= squared(sphere->position.x - cube->Bmin.x);
-    else if (sphere->position.x > cube->Bmax.x) dist_squared -= squared(sphere->position.x - cube->Bmax.x);
-    if (sphere->position.y < cube->Bmin.y) dist_squared -= squared(sphere->position.y - cube->Bmin.y);
-    else if (sphere->position.y > cube->Bmax.y) dist_squared -= squared(sphere->position.y - cube->Bmax.y);
-    if (sphere->position.z < cube->Bmin.z) dist_squared -= squared(sphere->position.z - cube->Bmin.z);
-    else if (sphere->position.z > cube->Bmax.z) dist_squared -= squared(sphere->position.z - cube->Bmax.z);
-    return dist_squared > 0;
-}
-
-bool doesRayIntersectCube(glm::vec3 ray_start, glm::vec3 dir, IObject *cube, float &htmin, float &htmax)
-{
-    Cube *ncube = dynamic_cast<Cube *>(cube);
-    //glm::vec3 dir = ray_end - ray_start;
-    glm::vec3 invDir = -dir;
-    glm::vec3 tbot = invDir * (ncube->Bmin - ray_start);
-    glm::vec3 ttop = invDir * (ncube->Bmax - ray_start);
-    glm::vec3 tmin = min(ttop, tbot);
-    glm::vec3 tmax = max(ttop, tbot);
-    glm::vec2 t = max(vec2(tmin.x, tmin.x), vec2(tmin.y, tmin.z));
-    float t0 = max(t.x, t.y);
-    t = min(vec2(tmax.x, tmax.x), vec2(tmax.y, tmax.z));
-    float t1 = min(t.x, t.y);
-    htmin = t0;
-    htmax = t1;
-    return t1 > max(t0, 0.0f);
-}
-
-void renderDemoScene(Shader &shader, Cube *cube, Cube *cube2, Sphere *sphere)
-{
-    glActiveTexture(GL_TEXTURE0);
-    cube->texture->bind();
-    glm::mat4 model = glm::mat4(1.0f);
-    shader.uniformMatrix(model, "model");
-    if (state->pickedObject == 0)
-        shader.setInt(1, "isPicked");
-    else
-        shader.setInt(0, "isPicked");
-    cube->draw();
-
-    glActiveTexture(GL_TEXTURE0);
-    cube2->texture->bind();
-    model = glm::mat4(1.0f);
-    shader.uniformMatrix(model, "model");
-    if (state->pickedObject == 1)
-        shader.setInt(1, "isPicked");
-    else
-        shader.setInt(0, "isPicked");
-    cube2->draw();
-
-    if (doesCubeIntersectSphere(cube, sphere))
-    {
-        sphere->update(state->deltaTime, true, cube->position.y);
-    }
-
-    if (doesCubeIntersectSphere(cube2, sphere))
-    {
-        sphere->update(state->deltaTime, true, cube2->position.y);
-    }
-    else
-    {
-        sphere->update(state->deltaTime, false, 0.0);
-    }
-
-    vec3 sphereTranslate = sphere->position - sphere->startPosition;
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, sphereTranslate);
-    shader.uniformMatrix(model, "model");
-    if (state->pickedObject == 2)
-    {
-        // с этим условием получаются рывки, если пытаться сделать норм скорость
-        // без - объект продолжает двигаться даже если не двигать мышкой, ибо сохраняется последние данные deltaX и deltaY
-        if (state->x - state->dx != 0 || state->y - state->dy != 0)
-        {
-            sphere->position.x += state->deltaX * state->deltaTime;
-            sphere->position.z += state->deltaY * state->deltaTime;
-
-            sphereTranslate = sphere->position - sphere->startPosition;
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, sphereTranslate);
-            shader.uniformMatrix(model, "model");
-        }
-        shader.setInt(1, "isPicked");
-    }
-    else
-        shader.setInt(0, "isPicked");
-    sphere->draw();
-}*/
-
 void renderScene(Shader &shader, Scene *scene)
 {
     glActiveTexture(GL_TEXTURE0);
-    glm::vec3 ray_start = state->camera->pos;
-    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
-    glm::vec3 ray_end = ray_start + ray_dir * 50.0f;
-    glm::vec3 hit;
-
-    glLineWidth(2.5);
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINES);
-    glVertex3f(ray_start.x, ray_start.y, ray_start.z);
-    glVertex3f(ray_end.x, ray_end.y, ray_end.z);
-    glEnd();
 
     for (size_t i = 0; i < scene->objects.size(); i++)
     {
@@ -311,16 +206,13 @@ void renderScene(Shader &shader, Scene *scene)
         scene->objects[i]->texture->bind();
         scene->objects[i]->draw();
     }
-    //LOG("")
 }
 
 void renderSceneId(Shader &shader, Scene *scene)
 {
     for (int i = 0; i < scene->objects.size(); i++)
     {
-        /*vec3 objPosTranslate = scene->objects[i]->position - scene->objects[i]->startPosition;
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, objPosTranslate);*/
+        // Model is updated already
         shader.uniformMatrix(scene->objects[i]->model, "model");
         int r = (i & 0x000000FF) >>  0;
         int g = (i & 0x0000FF00) >>  8;
@@ -373,13 +265,8 @@ long double operator "" _mm(unsigned long long mm)
 void Window::startLoop()
 {
     glEnable(GL_DEPTH_TEST);
-    ObjectLoader loader;
+
     GUIRenderer gui(mainWindow);
-
-    Texture *texture = new Texture("res/textures/cube.jpg");
-
-    Texture *grassAlbedo = new Texture("res/textures/grass_material/grass1-albedo3.png");
-    grassAlbedo->loadTexture();
 
     Texture *floorTexture = new Texture("res/textures/floor.jpg");
     floorTexture->loadTexture();
@@ -398,30 +285,15 @@ void Window::startLoop()
                     "res/textures/back.jpg"
             };
 
-    /*Cube *cube = new Cube({0, 0, 0}, {2048, 1, 2048});
-    cube->physicsEnabled = true;
-    cube->collisionEnabled = true;
-    cube->texture = grassAlbedo;
-    cube->generateVAO();
-    Cube *cube2 = new Cube({750, 3, 750}, {5, 1, 5});
-    cube2->physicsEnabled = true;
-    cube2->collisionEnabled = true;
-    cube2->texture = texture;
-    cube2->generateVAO();
-    glm::vec3 startPos{748, 15, 748};
-    Sphere *sphere = new Sphere(startPos, 1.0f);
-    sphere->physicsEnabled = true;
-    sphere->collisionEnabled = true;
-    sphere->velocity = {2, 0, 2};
-    sphere->texture = texture;
-    sphere->generateVAO();*/
 
     Cube *floor = new Cube({-10, -1, -10}, {20, 1, 20});
     floor->texture = floorTexture;
     floor->texScaleX = floor->texScaleY = 8;
     floor->generateVAO();
 
-    Cube *bottomSide = new Cube({0, 0, -600_mm}, {1500_mm, 132_mm, 600_mm});
+    state->wardrobeGenerator = new WardrobeGenerator({0, 0, 0}, 1500_mm, 2400_mm, 600_mm, 16_mm, 132_mm, woodTexture);
+
+    /*Cube *bottomSide = new Cube({0, 0, -600_mm}, {1500_mm, 132_mm, 600_mm});
     bottomSide->texture = woodTexture;
     bottomSide->texScaleX = 4;
     bottomSide->texScaleY = 1;
@@ -473,7 +345,7 @@ void Window::startLoop()
     shellHalfLeft1->texture = woodTexture;
     shellHalfLeft1->texScaleX = 2;
     shellHalfLeft1->texScaleY = 2;
-    shellHalfLeft1->generateVAO();
+    shellHalfLeft1->generateVAO();*/
 
     //vec3 lightPos(730.0f, 15.0f, 730.0f);
     vec3 lightPos(15.0f, 25.0f, -20.0f);
@@ -481,26 +353,19 @@ void Window::startLoop()
     auto skybox = genSkyboxVAO();
 
     Scene *scene = new Scene();
-    /*scene->addObject(cube);
-    scene->addObject(cube2);
-    scene->addObject(sphere);*/
+
     scene->addObject(floor);
-    scene->addObject(bottomSide);
-    scene->addObject(backSide);
-    scene->addObject(topSide);
-    scene->addObject(leftSide);
-    scene->addObject(rightSide);
-    scene->addObject(centerSide);
-    //scene->addObject(shellMainLow);
-    scene->addObject(shellMainHigh);
-    //scene->addObject(shellHalfLeft1);
+    scene->addObject(state->wardrobeGenerator->bottomSide);
+    scene->addObject(state->wardrobeGenerator->backSide);
+    scene->addObject(state->wardrobeGenerator->topSide);
+    scene->addObject(state->wardrobeGenerator->leftSide);
+    scene->addObject(state->wardrobeGenerator->rightSide);
     state->scene = scene;
 
     glEnable(GL_DEPTH_TEST);
     state->camera = new Camera(glm::vec3(-20.0f, 15.0f, -20.0f), radians(60.0f));
 
     unsigned int cubemapTexture = skyboxTexture->loadCubemap(faces);
-    texture->loadTexture();
 
     const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
     unsigned int depthMapFBO;
@@ -551,9 +416,9 @@ void Window::startLoop()
     Shader simpleDepthShader("vertDepthShader", "fragDepthShader");
     simpleDepthShader.link();
 
-    Shader debugQuad("vertDebugQuad", "fragDebugQuad");
-    debugQuad.setInt(0, "depthMap");
-    debugQuad.link();
+    //Shader debugQuad("vertDebugQuad", "fragDebugQuad");
+    //debugQuad.setInt(0, "depthMap");
+    //debugQuad.link();
 
     double lastTime = glfwGetTime();
 
@@ -579,9 +444,8 @@ void Window::startLoop()
 
         glViewport(0, 0,  SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glActiveTexture(GL_TEXTURE0);
-            texture->bind();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);
         renderScene(simpleDepthShader, scene);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -615,10 +479,9 @@ void Window::startLoop()
         glBindTexture(GL_TEXTURE_2D, depthMap);
         renderScene(shader, scene);
 
-
-        debugQuad.use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        //debugQuad.use();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, depthMap);
         //renderQuad();
 
         glDepthFunc(GL_LEQUAL);
@@ -633,8 +496,6 @@ void Window::startLoop()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
-
-        state->lmbClicked = false;
 
         gui.render(state);
 

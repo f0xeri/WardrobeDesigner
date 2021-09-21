@@ -9,7 +9,7 @@
 
 class Cube : public IObject {
 public:
-    Cube(glm::vec3 position, glm::vec3 size) : IObject(position), size(size),picked(false) {};
+    Cube(glm::vec3 position, glm::vec3 size) : IObject(position), size(size), picked(false) {};
     glm::vec3 size;
 
     bool picked;

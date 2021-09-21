@@ -115,11 +115,20 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         glReadPixels(x, Window::_height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
         localState->pickedObject = pickedID;
-        localState->scene->objects[pickedID]->start_move(localState);
+        if (pickedID > localState->scene->objects.size())
+        {
+            localState->pickedObject = -1;
+        }
+        else
+        {
+            localState->pickedObject = pickedID;
+            localState->scene->objects[pickedID]->start_move(localState);
+        }
     }
     else
     {
-        localState->scene->objects[localState->pickedObject]->end_move();
+        if (localState->pickedObject != -1)
+            localState->scene->objects[localState->pickedObject]->end_move();
         localState->pickedObject = -1;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

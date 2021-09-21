@@ -43,7 +43,7 @@ public:
     virtual void update(State *state, size_t currentId) {};
     virtual void applyTranslations() {};
     virtual void draw() {};
-    
+
     virtual void start_move(State *state) {};
     virtual void end_move() {};
 

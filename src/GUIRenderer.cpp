@@ -21,9 +21,8 @@ void GUIRenderer::render(State *state)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    //if (state->showInventory) renderInventory(state);
     if (state->showDebug) renderDebugInfo(state);
-    //renderRendererSettings(state);
+    renderSettings(state);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

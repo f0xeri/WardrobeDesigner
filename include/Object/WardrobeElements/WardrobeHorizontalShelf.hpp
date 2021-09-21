@@ -1,0 +1,14 @@
+//
+// Created by Yaroslav on 21.09.2021.
+//
+
+#ifndef FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
+#define FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
+
+
+class WardrobeHorizontalShelf {
+
+};
+
+
+#endif //FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
