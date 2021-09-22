@@ -19,6 +19,7 @@
 #include "Object/Cube.hpp"
 #include "Object/Sphere.hpp"
 #include "Scene.hpp"
+#include "Tools.hpp"
 
 State *state;
 Controls *controls;
@@ -250,17 +251,6 @@ void renderQuad()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
-
-long double operator "" _mm(long double mm)
-{
-    return mm / 320.0f;
-}
-
-long double operator "" _mm(unsigned long long mm)
-{
-    return mm / 320.0f;
-}
-
 
 void Window::startLoop()
 {

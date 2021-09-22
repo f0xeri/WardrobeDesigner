@@ -133,6 +133,7 @@ void Cube::generateVAO() {
 
 void Cube::applyTranslations() {
     model = mat4(1.0f);
+    model = glm::scale(model, size / startSize);
     model = glm::translate(model, position - startPosition);
 }
 
@@ -189,9 +190,8 @@ void Cube::start_move(State *state)
     Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
     bool result = checkRayCubeIntercection(Bmin, Bmax, ray_start, ray_end, hit);
 
-
-    movement_plane.origin = vec3(0,0,hit.z);
-    movement_plane.normal = vec3(0,0,1);
+    movement_plane.origin = vec3(0, 0, hit.z);
+    movement_plane.normal = vec3(0, 0, 1);
     float intersect_distance = 0;
     origin_offset = hit - position;
     picked = true;
@@ -202,8 +202,8 @@ void Cube::end_move()
     picked = false;
 }
 
-void Cube::update(State *state, size_t currentId) {
-
+void Cube::update(State *state, size_t currentId)
+{
     if (picked)
     {
         glm::vec3 ray_start = state->camera->pos;
@@ -216,7 +216,8 @@ void Cube::update(State *state, size_t currentId) {
     applyTranslations();
 }
 
-void Cube::draw() {
+void Cube::draw()
+{
     assert(mIndicesBuffer != 0);
     glBindVertexArray(VAO);
     for (size_t i = 0; i < mBuffers.size(); ++i)

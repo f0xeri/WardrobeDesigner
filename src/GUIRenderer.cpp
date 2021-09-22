@@ -2,6 +2,8 @@
 // Created by Yaroslav on 05.04.2021.
 //
 
+#include <Object/WardrobeElements/WardrobeVerticalElement.hpp>
+#include <Object/WardrobeElements/WardrobeHorizontalShelf.hpp>
 #include "GUIRenderer.hpp"
 
 GUIRenderer::GUIRenderer(GLFWwindow *window)
@@ -47,6 +49,7 @@ void GUIRenderer::renderDebugInfo(State *state)
     ImGui::Text("%s", resSS.str().c_str());
     ImGui::End();
 }
+
 std::string current_item;
 int selected_item_index;
 void GUIRenderer::renderSettings(State *state)
@@ -86,9 +89,32 @@ void GUIRenderer::renderSettings(State *state)
 
         ImGui::Begin(stringstream.str().c_str(), nullptr, window_flags);
         ImGui::Text("Позиция");
-        ImGui::InputFloat("x", &state->scene->objects[state->pickedObject]->position.x, 0.01f);
-        ImGui::InputFloat("y", &state->scene->objects[state->pickedObject]->position.y, 0.01f);
-        ImGui::InputFloat("z", &state->scene->objects[state->pickedObject]->position.z, 0.01f);
+
+        float x = to_mm(state->scene->objects[state->pickedObject]->position.x);
+        float y = to_mm(state->scene->objects[state->pickedObject]->position.y);
+        float z = to_mm(state->scene->objects[state->pickedObject]->position.z);
+
+        ImGui::InputFloat("pos x", &x, 1.0f);
+        ImGui::InputFloat("pos y", &y, 1.0f);
+        ImGui::InputFloat("pos z", &z, 1.0f);
+
+        // If picked object is cube or derived of cube we can get and set size
+        Cube *object = dynamic_cast<Cube *>(state->scene->objects[state->pickedObject]);
+        if (object != nullptr)
+        {
+            float szx = to_mm(object->size.x);
+            float szy = to_mm(object->size.y);
+            float szz = to_mm(object->size.z);
+
+            ImGui::Text("Размер");
+            ImGui::InputFloat("size x", &szx, 1.0f);
+            ImGui::InputFloat("size y", &szy, 1.0f);
+            ImGui::InputFloat("size z", &szz, 1.0f);
+
+            object->size.x = from_mm(szx);
+            object->size.y = from_mm(szy);
+            object->size.z = from_mm(szz);
+        }
 
         ImGui::Text("Текстура");
         current_item = state->scene->objects[state->pickedObject]->texture->name;
@@ -136,6 +162,10 @@ void GUIRenderer::renderSettings(State *state)
         ImGui::GetStyle().FramePadding.y = 3;
         ImGui::GetStyle().ItemSpacing.y = prevItemSpacingY;
         ImGui::End();
+
+        state->scene->objects[state->pickedObject]->position.x = from_mm(x);
+        state->scene->objects[state->pickedObject]->position.y = from_mm(y);
+        state->scene->objects[state->pickedObject]->position.z = from_mm(z);
     }
     ImGui::End();
 }
@@ -143,7 +173,53 @@ void GUIRenderer::renderSettings(State *state)
 
 void GUIRenderer::renderWardrobeMenu(State *state)
 {
+    float addObjWinX, addObjWinY, addObjWinW, addObjWinH;
 
+    addObjWinX = 0;
+    addObjWinY = 0;
+    addObjWinW = Window::_width / 6.0f;
+    addObjWinH = Window::_height;
+
+
+    ImGuiWindowFlags window_flags = 0;
+    ImGui::SetNextWindowPos({addObjWinX, addObjWinY}, ImGuiCond_Always);
+    ImGui::SetNextWindowSize({addObjWinW, addObjWinH});
+    window_flags |= ImGuiWindowFlags_NoScrollbar;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    ImGui::Begin("Добавление детали", nullptr, window_flags);
+    std::vector<std::string> items;
+    items.emplace_back("Вертикальная перегородка");
+    items.emplace_back("Горизонтальная полка");
+    int i = 0;
+    for (auto & item : items) {
+        if (ImGui::Button(item.c_str(), {addObjWinW - 18, 32}))
+        {
+            switch (i)
+            {
+                case 0:
+                {
+                    auto *obj = new WardrobeVerticalElement({20, 20, 20}, {3200_mm, 3200_mm, 20});
+                    obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
+                    obj->generateVAO();
+                    state->scene->addObject(obj);
+                    break;
+                }
+                case 1:
+                {
+                    auto *obj = new WardrobeHorizontalShelf({-20, 20, -20}, {20, 20, 20});
+                    obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
+                    obj->generateVAO();
+                    state->scene->addObject(obj);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        i++;
+    }
+    ImGui::End();
 }
 
 void GUIRenderer::render(State *state)
@@ -154,6 +230,7 @@ void GUIRenderer::render(State *state)
 
     //if (state->showDebug) renderDebugInfo(state);
     renderSettings(state);
+    renderWardrobeMenu(state);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

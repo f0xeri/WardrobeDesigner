@@ -30,7 +30,8 @@ set(SRC ${PROJECT_SOURCE_DIR}/src/main.cpp
         ${PROJECT_SOURCE_DIR}/src/WardrobeGenerator.cpp
         ${PROJECT_SOURCE_DIR}/src/Object/WardrobeElements/WardrobeEdge.cpp
         ${PROJECT_SOURCE_DIR}/src/Object/WardrobeElements/WardrobeHorizontalShelf.cpp
-        ${PROJECT_SOURCE_DIR}/src/Object/WardrobeElements/WardrobeVerticalShelf.cpp)
+        ${PROJECT_SOURCE_DIR}/src/Object/WardrobeElements/WardrobeVerticalElement.cpp
+        ${PROJECT_SOURCE_DIR}/src/Tools.cpp)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 

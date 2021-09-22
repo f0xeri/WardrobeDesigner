@@ -6,11 +6,13 @@
 #define MINE_GUIRENDERER_HPP
 
 #include <sstream>
+#include <typeinfo>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "State.hpp"
 #include "Window.h"
+#include "Tools.hpp"
 
 class GUIRenderer
 {
