@@ -285,6 +285,8 @@ void Window::startLoop()
                     "res/textures/back.jpg"
             };
 
+    state->wardrobeTextures.insert(std::make_pair(floorTexture->name, floorTexture));
+    state->wardrobeTextures.insert(std::make_pair(woodTexture->name, woodTexture));
 
     Cube *floor = new Cube({-10, -1, -10}, {20, 1, 20});
     floor->texture = floorTexture;

@@ -13,11 +13,11 @@
 class Texture
 {
 private:
-    const char *name;
     unsigned char *data;
     int width, height, nrChannels;
 public:
     GLuint texture;
+    const char *name;
     Texture(const char *name);
     ~Texture();
     void loadTexture();

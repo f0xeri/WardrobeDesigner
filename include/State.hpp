@@ -5,6 +5,7 @@
 #ifndef MINE_STATE_HPP
 #define MINE_STATE_HPP
 
+#include <map>
 #include "Camera.h"
 #include "Scene.hpp"
 #include "WardrobeGenerator.hpp"
@@ -17,6 +18,7 @@ struct State
     Camera *camera;
     Scene *scene;
     WardrobeGenerator *wardrobeGenerator;
+    std::map<std::string, Texture*> wardrobeTextures;
 
     float deltaX = 0.0f;
     float deltaY = 0.0f;
