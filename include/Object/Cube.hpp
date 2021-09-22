@@ -14,7 +14,7 @@ public:
     glm::vec3 startSize;
 
     bool picked;
-
+    glm::vec3 Bmax, Bmin;
     struct plane_t
     {
         glm::vec3 origin;

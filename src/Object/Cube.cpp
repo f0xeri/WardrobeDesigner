@@ -12,40 +12,40 @@
 void Cube::generateVAO() {
     std::vector<glm::vec3> cube = {
             // top
-            {0 + position.x, size.y + position.y, size.z + position.z},
-            {size.x + position.x, size.y + position.y, size.z + position.z},
-            {size.x + position.x, size.y + position.y, 0 + position.z},
-            {0 + position.x, size.y + position.y, 0 + position.z},
+            {0, 1, 1},
+            {1, 1, 1},
+            {1, 1, 0},
+            {0, 1, 0},
 
             // back
-            {size.x + position.x, 0 + position.y, 0 + position.z},
-            {0 + position.x, 0 + position.y, 0 + position.z},
-            {0 + position.x, size.y + position.y, 0 + position.z},
-            {size.x + position.x, size.y + position.y, 0 + position.z},
+            {1, 0, 0},
+            {0, 0, 0},
+            {0, 1, 0},
+            {1, 1, 0},
 
-            {0 + position.x, 0 + position.y, size.z + position.z},
-            {size.x + position.x, 0 + position.y, size.z + position.z},
-            {size.x + position.x, size.y + position.y, size.z + position.z},
-            {0 + position.x, size.y + position.y, size.z + position.z},
+            {0, 0, 1},
+            {1, 0, 1},
+            {1, 1, 1},
+            {0, 1, 1},
 
-            {0 + position.x, 0 + position.y, 0 + position.z},
-            {size.x + position.x, 0 + position.y, 0 + position.z},
-            {size.x + position.x, 0 + position.y, size.z + position.z},
-            {0 + position.x, 0 + position.y, size.z + position.z},
+            {0, 0, 0},
+            {1, 0, 0},
+            {1, 0, 1},
+            {0, 0, 1},
 
-            {size.x + position.x, 0 + position.y, size.z + position.z},
-            {size.x + position.x, 0 + position.y, 0 + position.z},
-            {size.x + position.x, size.y + position.y, 0 + position.z},
-            {size.x + position.x, size.y + position.y, size.z + position.z},
+            {1, 0, 1},
+            {1, 0, 0},
+            {1, 1, 0},
+            {1, 1, 1},
 
-            {0 + position.x, 0 + position.y, 0 + position.z},
-            {0 + position.x, 0 + position.y, size.z + position.z},
-            {0 + position.x, size.y + position.y, size.z + position.z},
-            {0 + position.x, size.y + position.y, 0 + position.z}
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 1, 1},
+            {0, 1, 0}
     };
 
     //Bmin = {position.x, position.y, position.z};
-    //Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
+    //Bmax = {1 + position.x, 1 + position.y, 1 + position.z};
 
     std::vector<glm::vec2> cubeTexCoords;
     cubeTexCoords.reserve(6);
@@ -133,8 +133,10 @@ void Cube::generateVAO() {
 
 void Cube::applyTranslations() {
     model = mat4(1.0f);
-    model = glm::scale(model, size / startSize);
-    model = glm::translate(model, position - startPosition);
+    Bmin = {position.x, position.y, position.z};
+    Bmax = { size.x + position.x, size.y + position.y, size.z + position.z};
+    model = glm::translate(model, position);
+    model = glm::scale(model, size);
 }
 
 int inline GetIntersection(float fDst1, float fDst2, vec3 P1, vec3 P2, vec3 &Hit) {
@@ -185,9 +187,8 @@ void Cube::start_move(State *state)
     glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
     glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
     glm::vec3 hit;
-    glm::vec3 Bmin, Bmax;
     Bmin = {position.x, position.y, position.z};
-    Bmax = {size.x + position.x, size.y + position.y, size.z + position.z};
+    Bmax = { size.x + position.x, size.y + position.y, size.z + position.z};
     bool result = checkRayCubeIntercection(Bmin, Bmax, ray_start, ray_end, hit);
 
     movement_plane.origin = vec3(0, 0, hit.z);
@@ -204,6 +205,7 @@ void Cube::end_move()
 
 void Cube::update(State *state, size_t currentId)
 {
+    applyTranslations();
     if (picked)
     {
         glm::vec3 ray_start = state->camera->pos;
@@ -213,7 +215,6 @@ void Cube::update(State *state, size_t currentId)
         glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
         position.x = (intersect_pos - origin_offset).x;
     }
-    applyTranslations();
 }
 
 void Cube::draw()
