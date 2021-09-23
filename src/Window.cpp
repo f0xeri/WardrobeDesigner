@@ -341,6 +341,7 @@ void Window::startLoop()
 
     //vec3 lightPos(730.0f, 15.0f, 730.0f);
     vec3 lightPos(15.0f, 25.0f, -20.0f);
+    //vec3 lightPos(10.0f, 10.0f, -10.0f);
 
     auto skybox = genSkyboxVAO();
 

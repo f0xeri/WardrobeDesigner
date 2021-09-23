@@ -113,7 +113,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         double x, y;
         glfwGetCursorPos(window, &x, &y);
         // Do nothing if user clicked on GUI
-        if (x > Window::_width - Window::_width / 6.0f)
+        if (x < Window::_width / 6.0f || x > Window::_width - Window::_width / 6.0f)
         {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             return;

@@ -20,9 +20,13 @@ public:
     GUIRenderer(GLFWwindow *window);
     void render(State *state);
 
+    float menuBarHeight;
+
     void renderDebugInfo(State *state);
     void renderSettings(State *state);
     void renderWardrobeMenu(State *state);
+    void renderMenuBar(State *state);
+    void renderElementsList(State *state);
     void renderDebugString(const std::string &string, float x = 0.0f, float y = 0.0f);
 };
 

@@ -19,5 +19,6 @@ void main()
     pass_texCoord = vec2(texCoord.x, texCoord.y);
     fragPos = vec3(model * vec4(position, 1.0f));
     _fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0f);
-    _normal = mat3(transpose(inverse(model))) * normal;
+    //_normal = mat3(transpose(inverse(model))) * normal;
+    _normal = normal;
 }

@@ -24,10 +24,11 @@ public:
 class IObject
 {
 public:
-    IObject(glm::vec3 position) : position(position), startPosition(position), model(glm::mat4(1.0f)) {};
+    IObject(glm::vec3 position) : position(position), startPosition(position), model(glm::mat4(1.0f)), picked(false) {};
     glm::vec3 position;
     glm::vec3 startPosition;
     glm::mat4 model;
+    bool picked;
     struct plane_t
     {
         glm::vec3 origin;

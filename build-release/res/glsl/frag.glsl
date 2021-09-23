@@ -54,12 +54,13 @@ void main()
     vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
     float ambientStrength = 0.45f;
     vec3 ambientLighting = ambientStrength * lightColor;
+
     vec3 norm = normalize(_normal);
     vec3 lightDirection = normalize(lightPos - fragPos);
     float diff = max(dot(norm, lightDirection), 0.0f);
     vec3 diffuse = diff * lightColor * 0.6f;
 
-    float specularStrength = 1;
+    float specularStrength = 0.5f;
     vec3 viewDir = normalize(viewPos - fragPos);
 
     /*const float kEnergyConservation = ( 2.0 + kShininess ) / ( 2.0 * kPi );
@@ -69,11 +70,24 @@ void main()
     const float kEnergyConservation = ( 8.0 + kShininess ) / ( 8.0 * kPi );
     vec3 halfwayDir = normalize(lightDirection + viewDir);
     float spec = kEnergyConservation * pow(max(dot(_normal, halfwayDir), 0.0), kShininess) * when_gt(diff, 0.0f);
-
-    vec3 specular = spec * lightColor;
+    /*vec3 reflectDir = reflect(-lightDirection, _normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);*/
+    vec3 specular = spec * lightColor * specularStrength;
+    //specular = vec3(0.0);
     float shadow = ShadowCalculation();
+
+
+    //float constant = 1.0f;
+    //float linear = 0.0014;
+    //float quadratic = 0.000007;
+    //float distance = length(lightPos - fragPos);
+    //float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+    //ambientLighting *= attenuation;
+    //diffuse *= attenuation;
+    //specular *= attenuation;
     //shadow = 1;
     color = (vec4(ambientLighting, 1) + shadow * (vec4(diffuse, 1) + vec4(specular, 1))) * texture(u_texture, pass_texCoord);
     if (isPicked == 1) color = vec4(1.0, 0.0, 0.0, 1.0);
-    //color = vec4(shadow);
+    //color = vec4(dot(_normal, halfwayDir));
+    //color = vec4(_normal, 1.0);
 }

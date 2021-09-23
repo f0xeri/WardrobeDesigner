@@ -14,12 +14,22 @@ long double operator "" _mm(unsigned long long mm)
     return mm / 320.0f;
 }
 
-float to_mm(float mm)
+float from_mm(float mm)
 {
     return mm * 320.0f;
 }
 
-float from_mm(float mm)
+long double from_mm(int mm)
+{
+    return mm * 320.0f;
+}
+
+float to_mm(float mm)
+{
+    return mm / 320.0f;
+}
+
+long double to_mm(int mm)
 {
     return mm / 320.0f;
 }

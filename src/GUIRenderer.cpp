@@ -4,6 +4,7 @@
 
 #include <Object/WardrobeElements/WardrobeVerticalElement.hpp>
 #include <Object/WardrobeElements/WardrobeHorizontalShelf.hpp>
+#include <Logger.hpp>
 #include "GUIRenderer.hpp"
 
 GUIRenderer::GUIRenderer(GLFWwindow *window)
@@ -58,12 +59,12 @@ void GUIRenderer::renderSettings(State *state)
     float objWinX, objWinY, objWinW, objWinH;
 
     settingsWinX = objWinX = Window::_width - Window::_width / 6.0f;
-    settingsWinY = 0;
+    settingsWinY = menuBarHeight;
     settingsWinW = objWinW = Window::_width / 6.0f;
-    settingsWinH = state->pickedObject == -1 ? Window::_height : Window::_height - 2 * Window::_height / 3;
+    settingsWinH = state->pickedObject == -1 ? Window::_height + menuBarHeight : Window::_height - 2 * Window::_height / 3 + menuBarHeight;
 
-    objWinY = Window::_height - 2 * Window::_height / 3;
-    objWinH = Window::_height - Window::_height / 3;
+    objWinY = Window::_height - 2 * Window::_height / 3 + menuBarHeight;
+    objWinH = Window::_height - Window::_height / 3 - menuBarHeight;
 
     ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowPos({settingsWinX, settingsWinY}, ImGuiCond_Always);
@@ -176,9 +177,9 @@ void GUIRenderer::renderWardrobeMenu(State *state)
     float addObjWinX, addObjWinY, addObjWinW, addObjWinH;
 
     addObjWinX = 0;
-    addObjWinY = 0;
+    addObjWinY = menuBarHeight;
     addObjWinW = Window::_width / 6.0f;
-    addObjWinH = Window::_height;
+    addObjWinH = Window::_height / 2 - menuBarHeight;
 
 
     ImGuiWindowFlags window_flags = 0;
@@ -199,7 +200,7 @@ void GUIRenderer::renderWardrobeMenu(State *state)
             {
                 case 0:
                 {
-                    auto *obj = new WardrobeVerticalElement({20, 20, 20}, {3200_mm, 3200_mm, 20});
+                    auto *obj = new WardrobeVerticalElement({0, 0, 0}, {3200_mm, 3200_mm, 16_mm});
                     obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
                     obj->generateVAO();
                     state->scene->addObject(obj);
@@ -207,7 +208,7 @@ void GUIRenderer::renderWardrobeMenu(State *state)
                 }
                 case 1:
                 {
-                    auto *obj = new WardrobeHorizontalShelf({-20, 20, -20}, {20, 20, 20});
+                    auto *obj = new WardrobeHorizontalShelf({-20, 20, -20}, {20, 20, 16_mm});
                     obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
                     obj->generateVAO();
                     state->scene->addObject(obj);
@@ -221,6 +222,91 @@ void GUIRenderer::renderWardrobeMenu(State *state)
     }
     ImGui::End();
 }
+int width = 0, height = 0, depth = 0, boardThickness = 0, baseHeight = 0;
+void GUIRenderer::renderMenuBar(State *state)
+{
+    bool newProject = false;
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Файл"))
+        {
+            if (ImGui::MenuItem("Новый проект"))
+            {
+                newProject = true;
+            }
+            if (ImGui::MenuItem("Открыть проект"))
+            {
+
+            }
+            if (ImGui::MenuItem("Сохранить проект"))
+            {
+
+            }
+            if (ImGui::MenuItem("Экспортировать развертку"))
+            {
+
+            }
+            ImGui::EndMenu();
+        }
+        if (newProject)
+        {
+            state->scene->objects.clear();
+            ImGui::OpenPopup("Создание нового проекта");
+        }
+
+        float newProjWinX, newProjWinY, newProjWinW, newProjWinH;
+
+        newProjWinW = Window::_width / 3.0;
+        newProjWinH = Window::_height / 3.0;
+        newProjWinX = Window::_width / 2.0 - newProjWinW / 2.0;
+        newProjWinY = Window::_height / 2.0 - newProjWinH / 2.0;
+
+        ImGui::SetNextWindowPos({newProjWinX, newProjWinY}, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({newProjWinW, newProjWinH});
+        if (ImGui::BeginPopupModal("Создание нового проекта"))
+        {
+            ImGui::InputInt("Ширина шкафа", &width);
+            ImGui::InputInt("Высота шкафа", &height);
+            ImGui::InputInt("Глубина шкафа", &depth);
+            ImGui::InputInt("Толщина доски", &boardThickness);
+            ImGui::InputInt("Высота основания", &baseHeight);
+            if (ImGui::Button("Отмена"))
+                ImGui::CloseCurrentPopup();
+            ImGui::SameLine();
+            if (ImGui::Button("Создать"))
+            {
+                ImGui::CloseCurrentPopup();
+                Cube *floor = new Cube({-10, -1, -10}, {20, 1, 20});
+                floor->texture = state->wardrobeTextures.at("res/textures/floor.jpg");
+                floor->texScaleX = floor->texScaleY = 8;
+                floor->generateVAO();
+                state->scene->addObject(floor);
+
+                state->wardrobeGenerator = new WardrobeGenerator({0, 0, 0}, to_mm(width), to_mm(height), to_mm(depth), to_mm(boardThickness), to_mm(baseHeight), state->wardrobeTextures.at("res/textures/woodTexture.jpg"));
+                state->scene->addObject(state->wardrobeGenerator->bottomSide);
+                state->scene->addObject(state->wardrobeGenerator->backSide);
+                state->scene->addObject(state->wardrobeGenerator->topSide);
+                state->scene->addObject(state->wardrobeGenerator->leftSide);
+                state->scene->addObject(state->wardrobeGenerator->rightSide);
+            }
+            ImGui::EndPopup();
+        }
+        if (ImGui::BeginMenu("Справка"))
+        {
+            if (ImGui::MenuItem("Инструкция"))
+            {
+
+            }
+            if (ImGui::MenuItem("О программе"))
+            {
+
+            }
+            ImGui::EndMenu();
+        }
+        menuBarHeight = ImGui::GetWindowHeight();
+        ImGui::EndMainMenuBar();
+    }
+}
 
 void GUIRenderer::render(State *state)
 {
@@ -229,8 +315,10 @@ void GUIRenderer::render(State *state)
     ImGui::NewFrame();
 
     //if (state->showDebug) renderDebugInfo(state);
+    renderMenuBar(state);
     renderSettings(state);
     renderWardrobeMenu(state);
+    renderElementsList(state);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -252,4 +340,49 @@ void GUIRenderer::renderDebugString(const std::string &string, float x, float y)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ImGui::EndFrame();
     }
+}
+
+void GUIRenderer::renderElementsList(State *state)
+{
+    float objListWinX, objListWinY, objListWinW, objListWinH;
+    objListWinX = 0;
+    objListWinY = Window::_height / 2 - menuBarHeight;
+    objListWinW = Window::_width / 6.0f;
+    objListWinH = Window::_height / 2 + menuBarHeight;
+
+    ImGuiWindowFlags window_flags = 0;
+    ImGui::SetNextWindowPos({objListWinX, objListWinY}, ImGuiCond_Always);
+    ImGui::SetNextWindowSize({objListWinW, objListWinH});
+    window_flags |= ImGuiWindowFlags_NoScrollbar;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    ImGui::Begin("Список элементов шкафа", nullptr, window_flags);
+
+    int i = 0;
+    for (auto &object : state->scene->objects)
+    {
+        if (dynamic_cast<WardrobeEdge*>(object))
+        {
+            if (ImGui::Selectable((std::string("Составная часть шкафа #") + std::to_string(i)).c_str()))
+            {
+                state->pickedObject = i;
+            }
+        }
+        else if (dynamic_cast<WardrobeHorizontalShelf*>(object))
+        {
+            if (ImGui::Selectable((std::string("Горизонтальная полка #") + std::to_string(i)).c_str()))
+            {
+                state->pickedObject = i;
+            }
+        }
+        else if (dynamic_cast<WardrobeVerticalElement*>(object))
+        {
+            if (ImGui::Selectable((std::string("Вертикальная перегородка #") + std::to_string(i)).c_str()))
+            {
+                state->pickedObject = i;
+            }
+        }
+        i++;
+    }
+    ImGui::End();
 }

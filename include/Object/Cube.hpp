@@ -9,11 +9,10 @@
 
 class Cube : public IObject {
 public:
-    Cube(glm::vec3 position, glm::vec3 size) : IObject(position), size(size), startSize(size), picked(false) {};
+    Cube(glm::vec3 position, glm::vec3 size) : IObject(position), size(size), startSize(size) {};
     glm::vec3 size;
     glm::vec3 startSize;
 
-    bool picked;
     glm::vec3 Bmax, Bmin;
     struct plane_t
     {
