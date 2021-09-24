@@ -308,6 +308,55 @@ void GUIRenderer::renderMenuBar(State *state)
     }
 }
 
+
+void GUIRenderer::renderElementsList(State *state)
+{
+    float objListWinX, objListWinY, objListWinW, objListWinH;
+    objListWinX = 0;
+    objListWinY = Window::_height / 2 - menuBarHeight;
+    objListWinW = Window::_width / 6.0f;
+    objListWinH = Window::_height / 2 + menuBarHeight;
+
+    ImGuiWindowFlags window_flags = 0;
+    ImGui::SetNextWindowPos({objListWinX, objListWinY}, ImGuiCond_Always);
+    ImGui::SetNextWindowSize({objListWinW, objListWinH});
+    window_flags |= ImGuiWindowFlags_NoScrollbar;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    ImGui::Begin("Список элементов шкафа", nullptr, window_flags);
+
+    int i = 0;
+    for (auto &object : state->scene->objects)
+    {
+        if (dynamic_cast<WardrobeEdge*>(object))
+        {
+            if (dynamic_cast<WardrobeEdge*>(object)->enabled)
+            {
+                if (ImGui::Selectable((std::string("Составная часть шкафа #") + std::to_string(i)).c_str()))
+                {
+                    state->pickedObject = i;
+                }
+            }
+        }
+        else if (dynamic_cast<WardrobeHorizontalShelf*>(object))
+        {
+            if (ImGui::Selectable((std::string("Горизонтальная полка #") + std::to_string(i)).c_str()))
+            {
+                state->pickedObject = i;
+            }
+        }
+        else if (dynamic_cast<WardrobeVerticalElement*>(object))
+        {
+            if (ImGui::Selectable((std::string("Вертикальная перегородка #") + std::to_string(i)).c_str()))
+            {
+                state->pickedObject = i;
+            }
+        }
+        i++;
+    }
+    ImGui::End();
+}
+
 void GUIRenderer::render(State *state)
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -340,49 +389,4 @@ void GUIRenderer::renderDebugString(const std::string &string, float x, float y)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ImGui::EndFrame();
     }
-}
-
-void GUIRenderer::renderElementsList(State *state)
-{
-    float objListWinX, objListWinY, objListWinW, objListWinH;
-    objListWinX = 0;
-    objListWinY = Window::_height / 2 - menuBarHeight;
-    objListWinW = Window::_width / 6.0f;
-    objListWinH = Window::_height / 2 + menuBarHeight;
-
-    ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowPos({objListWinX, objListWinY}, ImGuiCond_Always);
-    ImGui::SetNextWindowSize({objListWinW, objListWinH});
-    window_flags |= ImGuiWindowFlags_NoScrollbar;
-    window_flags |= ImGuiWindowFlags_NoCollapse;
-    window_flags |= ImGuiWindowFlags_NoResize;
-    ImGui::Begin("Список элементов шкафа", nullptr, window_flags);
-
-    int i = 0;
-    for (auto &object : state->scene->objects)
-    {
-        if (dynamic_cast<WardrobeEdge*>(object))
-        {
-            if (ImGui::Selectable((std::string("Составная часть шкафа #") + std::to_string(i)).c_str()))
-            {
-                state->pickedObject = i;
-            }
-        }
-        else if (dynamic_cast<WardrobeHorizontalShelf*>(object))
-        {
-            if (ImGui::Selectable((std::string("Горизонтальная полка #") + std::to_string(i)).c_str()))
-            {
-                state->pickedObject = i;
-            }
-        }
-        else if (dynamic_cast<WardrobeVerticalElement*>(object))
-        {
-            if (ImGui::Selectable((std::string("Вертикальная перегородка #") + std::to_string(i)).c_str()))
-            {
-                state->pickedObject = i;
-            }
-        }
-        i++;
-    }
-    ImGui::End();
 }
