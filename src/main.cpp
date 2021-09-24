@@ -2,7 +2,7 @@
 #include "Window.h"
 
 int main() {
-    Window mainWindow("FoxEngine", 1280, 720);
+    Window mainWindow("WardrobeDesigner", 1280, 720);
     mainWindow.makeContextCurrent();
     mainWindow.startLoop();
     glfwTerminate();

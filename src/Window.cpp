@@ -80,7 +80,7 @@ void showFPS(GLFWwindow *pWindow)
     {
         double fps = double(nbFrames) / delta;
         std::stringstream ss;
-        ss << "FoxEngine " << " [" << fps << " FPS]";
+        ss << "WardrobeDesigner " << " [" << fps << " FPS]";
         glfwSetWindowTitle(pWindow, ss.str().c_str());
         nbFrames = 0;
         lastTime = currentTime;
@@ -479,7 +479,7 @@ void Window::startLoop()
         //glBindTexture(GL_TEXTURE_2D, depthMap);
         //renderQuad();
 
-        glDepthFunc(GL_LEQUAL);
+        /*glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
         skyboxTexture->bind();
         glm::mat4 model2 = glm::mat4(1.f);
@@ -490,7 +490,7 @@ void Window::startLoop()
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-        glDepthFunc(GL_LESS);
+        glDepthFunc(GL_LESS);*/
 
         gui.render(state);
 

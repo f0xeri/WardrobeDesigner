@@ -91,9 +91,9 @@ void GUIRenderer::renderSettings(State *state)
         ImGui::Begin(stringstream.str().c_str(), nullptr, window_flags);
         ImGui::Text("Позиция");
 
-        float x = to_mm(state->scene->objects[state->pickedObject]->position.x);
-        float y = to_mm(state->scene->objects[state->pickedObject]->position.y);
-        float z = to_mm(state->scene->objects[state->pickedObject]->position.z);
+        float x = from_mm(state->scene->objects[state->pickedObject]->position.x);
+        float y = from_mm(state->scene->objects[state->pickedObject]->position.y);
+        float z = from_mm(state->scene->objects[state->pickedObject]->position.z);
 
         ImGui::InputFloat("pos x", &x, 1.0f);
         ImGui::InputFloat("pos y", &y, 1.0f);
@@ -103,18 +103,18 @@ void GUIRenderer::renderSettings(State *state)
         Cube *object = dynamic_cast<Cube *>(state->scene->objects[state->pickedObject]);
         if (object != nullptr)
         {
-            float szx = to_mm(object->size.x);
-            float szy = to_mm(object->size.y);
-            float szz = to_mm(object->size.z);
+            float szx = from_mm(object->size.x);
+            float szy = from_mm(object->size.y);
+            float szz = from_mm(object->size.z);
 
             ImGui::Text("Размер");
             ImGui::InputFloat("size x", &szx, 1.0f);
             ImGui::InputFloat("size y", &szy, 1.0f);
             ImGui::InputFloat("size z", &szz, 1.0f);
 
-            object->size.x = from_mm(szx);
-            object->size.y = from_mm(szy);
-            object->size.z = from_mm(szz);
+            object->size.x = to_mm(szx);
+            object->size.y = to_mm(szy);
+            object->size.z = to_mm(szz);
         }
 
         ImGui::Text("Текстура");
@@ -164,9 +164,9 @@ void GUIRenderer::renderSettings(State *state)
         ImGui::GetStyle().ItemSpacing.y = prevItemSpacingY;
         ImGui::End();
 
-        state->scene->objects[state->pickedObject]->position.x = from_mm(x);
-        state->scene->objects[state->pickedObject]->position.y = from_mm(y);
-        state->scene->objects[state->pickedObject]->position.z = from_mm(z);
+        state->scene->objects[state->pickedObject]->position.x = to_mm(x);
+        state->scene->objects[state->pickedObject]->position.y = to_mm(y);
+        state->scene->objects[state->pickedObject]->position.z = to_mm(z);
     }
     ImGui::End();
 }
@@ -200,7 +200,8 @@ void GUIRenderer::renderWardrobeMenu(State *state)
             {
                 case 0:
                 {
-                    auto *obj = new WardrobeVerticalElement({0, 0, 0}, {3200_mm, 3200_mm, 16_mm});
+                    auto *obj = new WardrobeVerticalElement({state->wardrobeGenerator->width / 2 - state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->baseHeight, -state->wardrobeGenerator->depth},
+                                                            {state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->height - state->wardrobeGenerator->baseHeight - state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->depth});
                     obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
                     obj->generateVAO();
                     state->scene->addObject(obj);
@@ -208,7 +209,8 @@ void GUIRenderer::renderWardrobeMenu(State *state)
                 }
                 case 1:
                 {
-                    auto *obj = new WardrobeHorizontalShelf({-20, 20, -20}, {20, 20, 16_mm});
+                    auto *obj = new WardrobeHorizontalShelf({state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->height / 2 + state->wardrobeGenerator->baseHeight, -state->wardrobeGenerator->depth},
+                                                            {state->wardrobeGenerator->width - 2 * state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->depth});
                     obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
                     obj->generateVAO();
                     state->scene->addObject(obj);

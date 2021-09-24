@@ -5,6 +5,7 @@
 #include "WardrobeGenerator.hpp"
 
 WardrobeGenerator::WardrobeGenerator(glm::vec3 pos, long double width, long double height, long double depth, long double boardThickness, long double baseHeight, Texture *texture)
+                                                    : width(width), height(height), depth(depth), boardThickness(boardThickness), baseHeight(baseHeight)
 {
     bottomSide = new WardrobeEdge({pos.x, pos.y, -depth}, {width, baseHeight, depth});
     backSide = new WardrobeEdge(pos, {width, height, boardThickness});
