@@ -213,7 +213,13 @@ void Cube::update(State *state, size_t currentId)
         float intersect_distance = 0;
         glm::intersectRayPlane(ray_start, ray_dir, movement_plane.origin, movement_plane.normal, intersect_distance);
         glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
-        position.x = (intersect_pos - origin_offset).x;
+
+        if (moveAxis.x != 0)
+            position.x = (intersect_pos - origin_offset).x;
+        if (moveAxis.y != 0)
+            position.y = (intersect_pos - origin_offset).y;
+        if (moveAxis.z != 0)
+            position.z = (intersect_pos - origin_offset).z;
     }
 }
 

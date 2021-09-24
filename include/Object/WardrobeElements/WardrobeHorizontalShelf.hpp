@@ -10,7 +10,7 @@
 class WardrobeHorizontalShelf : public Cube
 {
 public:
-    WardrobeHorizontalShelf(glm::vec3 position, glm::vec3 size) : Cube(position, size) {};
+    WardrobeHorizontalShelf(glm::vec3 position, glm::vec3 size) : Cube(position, size) { moveAxis = {0, 1, 0}; };
     void update(State *state, size_t currentId) override;
     void draw() override;
 };

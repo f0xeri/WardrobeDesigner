@@ -5,6 +5,7 @@
 #include <Object/WardrobeElements/WardrobeVerticalElement.hpp>
 #include <Object/WardrobeElements/WardrobeHorizontalShelf.hpp>
 #include <Logger.hpp>
+#include <imgui_internal.h>
 #include "GUIRenderer.hpp"
 
 GUIRenderer::GUIRenderer(GLFWwindow *window)
@@ -162,11 +163,35 @@ void GUIRenderer::renderSettings(State *state)
         }
         ImGui::GetStyle().FramePadding.y = 3;
         ImGui::GetStyle().ItemSpacing.y = prevItemSpacingY;
-        ImGui::End();
 
-        state->scene->objects[state->pickedObject]->position.x = to_mm(x);
-        state->scene->objects[state->pickedObject]->position.y = to_mm(y);
-        state->scene->objects[state->pickedObject]->position.z = to_mm(z);
+        ImGui::Spacing();
+        ImGui::Spacing();
+        bool disabled = false;
+        if (dynamic_cast<WardrobeEdge*>(object))
+        {
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+            disabled = true;
+        }
+        if (ImGui::Button("Удалить элемент", {settingsWinW - 14, 32}))
+        {
+            state->scene->objects.erase(state->scene->objects.begin() + state->pickedObject);
+            state->pickedObject = -1;
+        }
+        else
+        {
+            state->scene->objects[state->pickedObject]->position.x = to_mm(x);
+            state->scene->objects[state->pickedObject]->position.y = to_mm(y);
+            state->scene->objects[state->pickedObject]->position.z = to_mm(z);
+        }
+
+        if (disabled)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleVar();
+        }
+
+        ImGui::End();
     }
     ImGui::End();
 }

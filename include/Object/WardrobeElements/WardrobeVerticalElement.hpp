@@ -11,7 +11,7 @@
 class WardrobeVerticalElement : public Cube
 {
 public:
-    WardrobeVerticalElement(glm::vec3 position, glm::vec3 size) : Cube(position, size) {};
+    WardrobeVerticalElement(glm::vec3 position, glm::vec3 size) : Cube(position, size) { moveAxis = {1, 0, 0};};
     void update(State *state, size_t currentId) override;
     void draw() override;
 };
