@@ -28,6 +28,8 @@ public:
     void applyTranslations() override;
     void update(State *state, size_t currentId) override;
     void draw() override;
+
+    bool intersect(const glm::vec3 &rayPos, const glm::vec3 &rayDir, float &t) const;
 };
 
 

@@ -133,8 +133,7 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
         glm::vec3 look = localState->arcBallCamera->pos - localState->arcBallCamera->lookat;
         float length = glm::length(look);
         glm::vec3 right = localState->arcBallCamera->getRightVector();
-        glm::vec3 pan = (localState->arcBallCamera->up * -click.y + right * click.x) *
-                0.005f * 1.0f * length;
+        glm::vec3 pan = (localState->arcBallCamera->up * -click.y + right * click.x) * 0.005f * 1.0f * length;
         localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos - pan, localState->arcBallCamera->lookat - pan, localState->arcBallCamera->up);
     }
     prev_mouse = {xpos, ypos};
@@ -142,7 +141,6 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, localState->idBuffer);
     if (localState->cursorLocked) return;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
@@ -152,12 +150,24 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         // Do nothing if user clicked on GUI
         if (x < Window::_width / 6.0f || x > Window::_width - Window::_width / 6.0f)
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             return;
         }
-        glReadPixels(x, Window::_height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
-        int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
+        glm::vec3 ray_start = localState->arcBallCamera->pos;
+        glm::vec3 ray_dir = localState->arcBallCamera->raycastFromViewportCoords(localState->dx, localState->dy);
+        glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
+        int pickedID = -1;
+        for (int i = 0; i < localState->scene->objects.size(); i++)
+        {
+            Cube *cube = dynamic_cast<Cube*>(localState->scene->objects[i]);
+            if (cube != nullptr)
+            {
+                float t;
+                if (cube->intersect(ray_start, ray_end, t))
+                    pickedID = i;
+            }
+        }
         localState->pickedObject = pickedID;
+        LOG(pickedID)
         if (pickedID > localState->scene->objects.size())
         {
             localState->pickedObject = -1;
@@ -175,7 +185,6 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         // If we set pickedObject to -1 here, object will be unpicked on left mouse button release
         //localState->pickedObject = -1;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)

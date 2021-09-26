@@ -210,20 +210,6 @@ void renderScene(Shader &shader, Scene *scene)
     }
 }
 
-void renderSceneId(Shader &shader, Scene *scene)
-{
-    for (int i = 0; i < scene->objects.size(); i++)
-    {
-        // Model is updated already
-        shader.uniformMatrix(scene->objects[i]->model, "model");
-        int r = (i & 0x000000FF) >>  0;
-        int g = (i & 0x0000FF00) >>  8;
-        int b = (i & 0x00FF0000) >> 16;
-        glUniform4f(glGetUniformLocation(shader.mProgram, "color"), r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-        scene->objects[i]->draw();
-    }
-}
-
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad()
@@ -286,63 +272,7 @@ void Window::startLoop()
 
     state->wardrobeGenerator = new WardrobeGenerator({0, 0, 0}, 1500_mm, 2400_mm, 600_mm, 16_mm, 132_mm, woodTexture);
 
-    /*Cube *bottomSide = new Cube({0, 0, -600_mm}, {1500_mm, 132_mm, 600_mm});
-    bottomSide->texture = woodTexture;
-    bottomSide->texScaleX = 4;
-    bottomSide->texScaleY = 1;
-    bottomSide->generateVAO();
-
-    Cube *backSide = new Cube({0, 0, 0}, {1500_mm, 2400_mm, 16_mm});
-    backSide->texture = woodTexture;
-    backSide->texScaleX = 4;
-    backSide->texScaleY = 1;
-    backSide->generateVAO();
-
-    Cube *topSide = new Cube({16_mm, 2384_mm, -600_mm}, {1468_mm, 16_mm, 600_mm});
-    topSide->texture = woodTexture;
-    topSide->texScaleX = 2;
-    topSide->texScaleY = 2;
-    topSide->generateVAO();
-
-    Cube *leftSide = new Cube({0, 132_mm, -600_mm}, {16_mm, 2268_mm, 600_mm});
-    leftSide->texture = woodTexture;
-    leftSide->texScaleX = 2;
-    leftSide->texScaleY = 2;
-    leftSide->generateVAO();
-
-    Cube *rightSide = new Cube({1484_mm, 132_mm, -600_mm}, {16_mm, 2268_mm, 600_mm});
-    rightSide->texture = woodTexture;
-    rightSide->texScaleX = 2;
-    rightSide->texScaleY = 2;
-    rightSide->generateVAO();
-
-    Cube *centerSide = new Cube({726_mm, 132_mm, -600_mm}, {16_mm, 1851_mm, 600_mm});
-    centerSide->texture = woodTexture;
-    centerSide->texScaleX = 2;
-    centerSide->texScaleY = 2;
-    centerSide->generateVAO();
-
-    Cube *shellMainLow = new Cube({16_mm, 2.4, -600_mm}, {3.9, 16_mm, 600_mm});
-    shellMainLow->texture = woodTexture;
-    shellMainLow->texScaleX = 2;
-    shellMainLow->texScaleY = 2;
-    shellMainLow->generateVAO();
-
-    Cube *shellMainHigh = new Cube({16_mm, 1983_mm, -600_mm}, {1468_mm, 16_mm, 600_mm});
-    shellMainHigh->texture = woodTexture;
-    shellMainHigh->texScaleX = 2;
-    shellMainHigh->texScaleY = 2;
-    shellMainHigh->generateVAO();
-
-    Cube *shellHalfLeft1 = new Cube({0, 3.4, -1.45}, {1.95, 16_mm, 600_mm});
-    shellHalfLeft1->texture = woodTexture;
-    shellHalfLeft1->texScaleX = 2;
-    shellHalfLeft1->texScaleY = 2;
-    shellHalfLeft1->generateVAO();*/
-
-    //vec3 lightPos(730.0f, 15.0f, 730.0f);
     vec3 lightPos(15.0f, 25.0f, -20.0f);
-    //vec3 lightPos(10.0f, 10.0f, -10.0f);
 
     auto skybox = genSkyboxVAO();
 
@@ -382,21 +312,6 @@ void Window::startLoop()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    //unsigned int idBuffer;
-    glGenFramebuffers(1, &state->idBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, state->idBuffer);
-    unsigned int idColor;
-    glGenTextures(1, &idColor);
-    glBindTexture(GL_TEXTURE_2D, idColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, idColor, 0);
-    unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, attachments);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Shader shader("vert", "frag");
     shader.link();
@@ -410,9 +325,10 @@ void Window::startLoop()
     Shader simpleDepthShader("vertDepthShader", "fragDepthShader");
     simpleDepthShader.link();
 
-    //Shader debugQuad("vertDebugQuad", "fragDebugQuad");
-    //debugQuad.setInt(0, "depthMap");
-    //debugQuad.link();
+    Shader debugQuad("vertDebugQuad", "fragDebugQuad");
+    debugQuad.setInt(0, "depthMap");
+    debugQuad.link();
+
     glm::vec3 eye(10, 10, 10);
     glm::vec3 center(0);
     glm::vec3 up(0, 1, 0);
@@ -446,25 +362,6 @@ void Window::startLoop()
         renderScene(simpleDepthShader, scene);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // color id
-        glBindFramebuffer(GL_FRAMEBUFFER, state->idBuffer);
-        glViewport(0, 0, Window::_width, Window::_height);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBindTexture(GL_TEXTURE_2D, idColor);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, nullptr);
-        colorIdShader.use();
-        //colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
-        colorIdShader.uniformMatrix(state->arcBallCamera->getProjectionMatrix() * state->arcBallCamera->getViewMatrix(), "projView");
-        renderSceneId(colorIdShader, scene);
-        //glFlush();
-        //glFinish();
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        //glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
         glViewport(0, 0, Window::_width, Window::_height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -479,10 +376,10 @@ void Window::startLoop()
         glBindTexture(GL_TEXTURE_2D, depthMap);
         renderScene(shader, scene);
 
-        //debugQuad.use();
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, depthMap);
-        //renderQuad();
+        /*debugQuad.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, idColor);
+        renderQuad();*/
 
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
