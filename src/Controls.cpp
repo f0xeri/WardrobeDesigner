@@ -5,6 +5,7 @@
 #include <thread>
 #include <iostream>
 #include <glm/ext/matrix_projection.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include "Controls.h"
 #include "Window.h"
 #include "Logger.hpp"
@@ -17,8 +18,8 @@ Controls::Controls(State *s) {
 
 void toggleCursor(GLFWwindow *window)
 {
-    localState->cursor_locked = !localState->cursor_locked;
-    glfwSetInputMode(window, GLFW_CURSOR, localState->cursor_locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    localState->cursorLocked = !localState->cursorLocked;
+    glfwSetInputMode(window, GLFW_CURSOR, localState->cursorLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
@@ -64,49 +65,85 @@ void updateInputs(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) localState->camera->pos -= localState->camera->up * localState->speed * localState->deltaTime;
 }
 
+glm::vec2 transform_mouse(glm::vec2 in)
+{
+    return glm::vec2(in.x * 2.f / Window::_width - 1.f, 1.f - 2.f * in.y / Window::_height);
+}
+
+glm::vec2 prev_mouse(-2.f);
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 {
     localState->deltaX = localState->deltaY = 0.0f;
-    if (localState->cursor_started){
+    if (localState->cursorStarted){
         localState->deltaX += xpos - localState->x;
         localState->deltaY += ypos - localState->y;
     }
-    else localState->cursor_started = true;
+    else localState->cursorStarted = true;
     localState->x = xpos;
     localState->y = ypos;
-    if (localState->cursor_locked)
+    if (localState->cursorLocked)
     {
         localState->camY += -localState->deltaY / Window::_height * 2;
         localState->camX += -localState->deltaX / Window::_height * 2;
 
-        if (localState->camY < -radians(89.0f)){
+        /*if (localState->camY < -radians(89.0f)){
             localState->camY = -radians(89.0f);
         }
         if (localState->camY > radians(89.0f)){
             localState->camY = radians(89.0f);
-        }
+        }*/
 
         localState->camera->rotation = mat4(1.0f);
-        localState->camera->rotate(localState->camY, localState->camX, 0);
+        //localState->camera->rotate(localState->camY, localState->camX, 0);
     }
 
-    // работает не совсем так, как хотелось бы, поэтому не стал юзать
+    glm::vec4 position(localState->arcBallCamera->pos.x, localState->arcBallCamera->pos.y, localState->arcBallCamera->pos.z, 1);
+    glm::vec4 pivot(localState->arcBallCamera->lookat.x, localState->arcBallCamera->lookat.y, localState->arcBallCamera->lookat.z, 1);
+
+    float deltaAngleX = (2 * M_PI / Window::_height);
+    float deltaAngleY = (M_PI / Window::_height);
+    float xAngle = (prev_mouse.x - xpos) * deltaAngleX;
+    float yAngle = (prev_mouse.y - ypos) * deltaAngleY;
+
+    const glm::vec2 cur_mouse = transform_mouse(glm::vec2(xpos, ypos));
+
+    float cosAngle = dot(localState->arcBallCamera->getViewDir(), localState->arcBallCamera->up);
+    if (cosAngle * sgn(deltaAngleY) > 0.99f)
+        deltaAngleY = 0;
+
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
-        localState->dragEnabled = true;
-    }
-    else
-    {
-        localState->dragEnabled = false;
-    }
-    //LOG(localState->deltaX << " " << localState->deltaY << " " << localState->cursor_started)
+        glm::mat4 rotationMatrixX(1.0f);
+        rotationMatrixX = glm::rotate(rotationMatrixX, xAngle, localState->arcBallCamera->up);
+        position = (rotationMatrixX * (position - pivot)) + pivot;
 
+        glm::mat4 rotationMatrixY(1.0f);
+        rotationMatrixY = glm::rotate(rotationMatrixY, yAngle, localState->arcBallCamera->getRightVector());
+        glm::vec3 finalPosition = (rotationMatrixY * (position - pivot)) + pivot;
+
+        localState->arcBallCamera->setCameraView(finalPosition, localState->arcBallCamera->lookat, localState->arcBallCamera->up);
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        glm::vec2 click = glm::vec2(xpos, ypos) - prev_mouse;
+        glm::vec3 look = localState->arcBallCamera->pos - localState->arcBallCamera->lookat;
+        float length = glm::length(look);
+        glm::vec3 right = localState->arcBallCamera->getRightVector();
+        glm::vec3 pan = (localState->arcBallCamera->up * -click.y + right * click.x) *
+                0.005f * 1.0f * length;
+        localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos - pan, localState->arcBallCamera->lookat - pan, localState->arcBallCamera->up);
+    }
+    prev_mouse = {xpos, ypos};
 }
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, localState->idBuffer);
-    if (localState->cursor_locked) return;
+    if (localState->cursorLocked) return;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         unsigned char data[4];
@@ -139,6 +176,12 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         //localState->pickedObject = -1;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->lookat + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->up);
+    localState->arcBallCamera->zoom += yoffset;
 }
 
 void resizeCallback(GLFWwindow *window, int width, int height)

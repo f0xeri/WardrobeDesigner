@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Scene.hpp"
 #include "WardrobeGenerator.hpp"
+#include "ArcBallCamera.hpp"
 
 struct State
 {
@@ -16,6 +17,7 @@ struct State
     float speed = 12.f;
     GLFWwindow *window;
     Camera *camera;
+    ArcBallCamera *arcBallCamera;
     Scene *scene;
     WardrobeGenerator *wardrobeGenerator;
     std::map<std::string, Texture*> wardrobeTextures;
@@ -31,18 +33,15 @@ struct State
     long long pickedObject = -1;
 
     bool dragEnabled = false;
-    bool cursor_locked = false;
-    bool cursor_started = false;
+    bool cursorLocked = true;
+    bool cursorStarted = false;
     bool showDebug = true;
 
     float camX = 0.0f;
     float camY = 0.0f;
-    bool vsync = false;
+    bool vsync = true;
 
-    int nbFrames = 0;
     bool showPolygons = false;
-
-    double lastTime;
 };
 
 

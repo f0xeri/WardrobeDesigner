@@ -219,7 +219,7 @@ void GUIRenderer::renderWardrobeMenu(State *state)
     items.emplace_back("Горизонтальная полка");
     int i = 0;
     for (auto & item : items) {
-        if (ImGui::Button(item.c_str(), {addObjWinW - 18, 32}) && !state->cursor_locked)
+        if (ImGui::Button(item.c_str(), {addObjWinW - 18, 32}) && !state->cursorLocked)
         {
             switch (i)
             {
@@ -359,7 +359,7 @@ void GUIRenderer::renderElementsList(State *state)
         {
             if (dynamic_cast<WardrobeEdge*>(object)->enabled)
             {
-                if (ImGui::Selectable((std::string("Составная часть шкафа #") + std::to_string(i)).c_str()) && !state->cursor_locked)
+                if (ImGui::Selectable((std::string("Составная часть шкафа #") + std::to_string(i)).c_str()) && !state->cursorLocked)
                 {
                     state->pickedObject = i;
                 }
@@ -367,14 +367,14 @@ void GUIRenderer::renderElementsList(State *state)
         }
         else if (dynamic_cast<WardrobeHorizontalShelf*>(object))
         {
-            if (ImGui::Selectable((std::string("Горизонтальная полка #") + std::to_string(i)).c_str()) && !state->cursor_locked)
+            if (ImGui::Selectable((std::string("Горизонтальная полка #") + std::to_string(i)).c_str()) && !state->cursorLocked)
             {
                 state->pickedObject = i;
             }
         }
         else if (dynamic_cast<WardrobeVerticalElement*>(object))
         {
-            if (ImGui::Selectable((std::string("Вертикальная перегородка #") + std::to_string(i)).c_str()) && !state->cursor_locked)
+            if (ImGui::Selectable((std::string("Вертикальная перегородка #") + std::to_string(i)).c_str()) && !state->cursorLocked)
             {
                 state->pickedObject = i;
             }

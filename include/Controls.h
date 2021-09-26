@@ -18,6 +18,7 @@ void updateInputs(GLFWwindow *window);
 void cursorCallback(GLFWwindow *window, double xpos, double ypos);
 void resizeCallback(GLFWwindow *window, int width, int height);
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 #endif //MINE_CONTROLS_H

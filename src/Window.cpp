@@ -133,6 +133,7 @@ Window::Window(const char *title, int width, int height)
     glfwSetCursorPosCallback(mainWindow, cursorCallback);
     glfwSetKeyCallback(mainWindow, keyCallback);
     glfwSetMouseButtonCallback(mainWindow, mouseButtonCallback);
+    glfwSetScrollCallback(mainWindow, scrollCallback);
     toggleCursor(mainWindow);
 }
 
@@ -412,7 +413,10 @@ void Window::startLoop()
     //Shader debugQuad("vertDebugQuad", "fragDebugQuad");
     //debugQuad.setInt(0, "depthMap");
     //debugQuad.link();
-
+    glm::vec3 eye(10, 10, 10);
+    glm::vec3 center(0);
+    glm::vec3 up(0, 1, 0);
+    state->arcBallCamera = new ArcBallCamera(eye, center, up, radians(60.0f));
     double lastTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(mainWindow))
@@ -451,7 +455,8 @@ void Window::startLoop()
         glBindTexture(GL_TEXTURE_2D, idColor);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::_width, Window::_height, 0, GL_RGBA, GL_FLOAT, nullptr);
         colorIdShader.use();
-        colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
+        //colorIdShader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
+        colorIdShader.uniformMatrix(state->arcBallCamera->getProjectionMatrix() * state->arcBallCamera->getViewMatrix(), "projView");
         renderSceneId(colorIdShader, scene);
         //glFlush();
         //glFinish();
@@ -466,8 +471,8 @@ void Window::startLoop()
         if (state->showPolygons) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         shader.use();
-        shader.uniformMatrix(state->camera->getProjectionMatrix() * state->camera->getViewMatrix(), "projView");
-        glUniform3f(glGetUniformLocation(shader.mProgram, "viewPos"), state->camera->pos.x, state->camera->pos.y, state->camera->pos.z);
+        shader.uniformMatrix(state->arcBallCamera->getProjectionMatrix() * state->arcBallCamera->getViewMatrix(), "projView");
+        glUniform3f(glGetUniformLocation(shader.mProgram, "viewPos"), state->arcBallCamera->pos.x, state->arcBallCamera->pos.y, state->arcBallCamera->pos.z);
         glUniform3f(glGetUniformLocation(shader.mProgram, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
         shader.uniformMatrix(lightSpaceMatrix, "lightSpaceMatrix");
         glActiveTexture(GL_TEXTURE2);
@@ -479,18 +484,18 @@ void Window::startLoop()
         //glBindTexture(GL_TEXTURE_2D, depthMap);
         //renderQuad();
 
-        /*glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
         skyboxTexture->bind();
         glm::mat4 model2 = glm::mat4(1.f);
         skyboxShader.uniformMatrix(model2, "view");
-        skyboxShader.uniformMatrix(state->camera->getProjectionMatrix() * glm::mat4(glm::mat3(state->camera->getViewMatrix())), "projection");
+        skyboxShader.uniformMatrix(state->arcBallCamera->getProjectionMatrix() * glm::mat4(glm::mat3(state->arcBallCamera->getViewMatrix())), "projection");
         glBindVertexArray(skybox);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-        glDepthFunc(GL_LESS);*/
+        glDepthFunc(GL_LESS);
 
         gui.render(state);
 
