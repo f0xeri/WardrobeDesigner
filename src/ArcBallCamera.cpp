@@ -55,3 +55,19 @@ void ArcBallCamera::setCameraView(glm::vec3 eye, glm::vec3 _lookat, glm::vec3 _u
     up = _up;
     updateViewMatrix();
 }
+
+glm::vec3 ArcBallCamera::raycastFromViewportCoords(double x, double y)
+{
+    float nx = (2.0f * x) / Window::_width - 1.0f;
+    float ny = (2.0f * y) / Window::_height - 1;
+    ny = -ny;
+    float nz = 1.0f;
+    glm::vec3 ray_nds = glm::vec3(nx, ny, nz);
+    glm::vec4 ray_clip = glm::vec4(ray_nds.x, ray_nds.y, -1.0, 1.0);
+    glm::vec4 ray_eye = inverse(getProjectionMatrix()) * ray_clip;
+    ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+    glm::vec3 ray_wor = (inverse(getViewMatrix()) * ray_eye);
+    ray_wor = normalize(ray_wor);
+    return ray_wor;
+}
+

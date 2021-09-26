@@ -115,7 +115,7 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
     if (cosAngle * sgn(deltaAngleY) > 0.99f)
         deltaAngleY = 0;
 
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && localState->pickedObject == -1)
     {
         glm::mat4 rotationMatrixX(1.0f);
         rotationMatrixX = glm::rotate(rotationMatrixX, xAngle, localState->arcBallCamera->up);
@@ -127,7 +127,7 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 
         localState->arcBallCamera->setCameraView(finalPosition, localState->arcBallCamera->lookat, localState->arcBallCamera->up);
     }
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && localState->pickedObject == -1)
     {
         glm::vec2 click = glm::vec2(xpos, ypos) - prev_mouse;
         glm::vec3 look = localState->arcBallCamera->pos - localState->arcBallCamera->lookat;

@@ -24,6 +24,7 @@ public:
     glm::vec3 right;
     glm::mat4 view;
     double zoom;
+
     void updateViewMatrix();
 
     ArcBallCamera(glm::vec3 pos, glm::vec3 lookAt, glm::vec3 up, float FOV);
@@ -34,6 +35,7 @@ public:
     glm::vec3 getViewDir();
     glm::vec3 getRightVector();
     void setCameraView(glm::vec3 eye, glm::vec3 _lookat, glm::vec3 _up);
+    glm::vec3 raycastFromViewportCoords(double x, double y);
 };
 
 

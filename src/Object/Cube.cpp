@@ -183,8 +183,8 @@ vec3 delta;
 
 void Cube::start_move(State *state)
 {
-    glm::vec3 ray_start = state->camera->pos;
-    glm::vec3 ray_dir = state->camera->raycastFromViewportCoords(state->dx, state->dy);
+    glm::vec3 ray_start = state->arcBallCamera->pos;
+    glm::vec3 ray_dir = state->arcBallCamera->raycastFromViewportCoords(state->dx, state->dy);
     glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
     glm::vec3 hit;
     Bmin = {position.x, position.y, position.z};
@@ -208,8 +208,8 @@ void Cube::update(State *state, size_t currentId)
     applyTranslations();
     if (picked)
     {
-        glm::vec3 ray_start = state->camera->pos;
-        glm::vec3 ray_dir = glm::normalize(state->camera->raycastFromViewportCoords(state->x, state->y));
+        glm::vec3 ray_start = state->arcBallCamera->pos;
+        glm::vec3 ray_dir = glm::normalize(state->arcBallCamera->raycastFromViewportCoords(state->x, state->y));
         float intersect_distance = 0;
         glm::intersectRayPlane(ray_start, ray_dir, movement_plane.origin, movement_plane.normal, intersect_distance);
         glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
