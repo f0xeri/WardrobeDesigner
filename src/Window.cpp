@@ -343,7 +343,7 @@ void Window::startLoop()
         lastTime = currentTime;
         glfwGetCursorPos(mainWindow, &state->dx, &state->dy);
 
-        updateInputs(mainWindow);
+        //updateInputs(mainWindow);
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;

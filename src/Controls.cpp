@@ -24,7 +24,7 @@ void toggleCursor(GLFWwindow *window)
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    /*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         toggleCursor(window);
     }
@@ -42,7 +42,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
                 break;
             }
         }
-
+    */
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
         localState->vsync = !localState->vsync;
@@ -57,12 +57,12 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 
 void updateInputs(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) localState->camera->pos += localState->camera->front * localState->speed * localState->deltaTime;
+    /*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) localState->camera->pos += localState->camera->front * localState->speed * localState->deltaTime;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) localState->camera->pos -= localState->camera->right * localState->speed * localState->deltaTime;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) localState->camera->pos -= localState->camera->front * localState->speed * localState->deltaTime;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) localState->camera->pos += localState->camera->right * localState->speed * localState->deltaTime;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) localState->camera->pos += localState->camera->up * localState->speed * localState->deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) localState->camera->pos -= localState->camera->up * localState->speed * localState->deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) localState->camera->pos -= localState->camera->up * localState->speed * localState->deltaTime;*/
 }
 
 glm::vec2 transform_mouse(glm::vec2 in)
@@ -167,7 +167,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
             }
         }
         localState->pickedObject = pickedID;
-        LOG(pickedID)
+
         if (pickedID > localState->scene->objects.size())
         {
             localState->pickedObject = -1;
