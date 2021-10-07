@@ -75,3 +75,8 @@ bool checkRayCubeIntercection(vec3 B1, vec3 B2, vec3 L1, vec3 L2, vec3 &Hit)
 
     return false;
 }
+
+bool within(glm::vec3 min, glm::vec3 max, glm::vec3 v)
+{
+    return v.x > min.x && v.y > min.y && v.z > min.z && v.x < max.x && v.y < max.y && v.z < max.z;
+}

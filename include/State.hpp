@@ -11,8 +11,10 @@
 #include "WardrobeGenerator.hpp"
 #include "ArcBallCamera.hpp"
 
+
 struct State
 {
+    
     float deltaTime;
     float speed = 12.f;
     GLFWwindow *window;
@@ -20,6 +22,7 @@ struct State
     ArcBallCamera *arcBallCamera;
     Scene *scene;
     WardrobeGenerator *wardrobeGenerator;
+    Cluster root;
     std::map<std::string, Texture*> wardrobeTextures;
 
     float deltaX = 0.0f;
@@ -37,11 +40,15 @@ struct State
     bool cursorStarted = false;
     bool showDebug = true;
 
+    bool isInsert = false;
+
     float camX = 0.0f;
     float camY = 0.0f;
     bool vsync = true;
 
     bool showPolygons = false;
+
+    
 };
 
 

@@ -225,11 +225,8 @@ void GUIRenderer::renderWardrobeMenu(State *state)
             {
                 case 0:
                 {
-                    auto *obj = new WardrobeVerticalElement({state->wardrobeGenerator->width / 2 - state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->baseHeight, -state->wardrobeGenerator->depth},
-                                                            {state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->height - state->wardrobeGenerator->baseHeight - state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->depth});
-                    obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
-                    obj->generateVAO();
-                    state->scene->addObject(obj);
+                    state->isInsert = true;
+                    state->pickedObject = -1;
                     break;
                 }
                 case 1:
