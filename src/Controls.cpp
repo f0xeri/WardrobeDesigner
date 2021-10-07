@@ -6,13 +6,19 @@
 #include <iostream>
 #include <glm/ext/matrix_projection.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/intersect.hpp>
+
 #include "Controls.h"
 #include "Window.h"
 #include "Logger.hpp"
 
+#include <Object/WardrobeElements/WardrobeVerticalElement.hpp>
+#include <Object/WardrobeElements/WardrobeHorizontalShelf.hpp>
+
 State *localState;
 
-Controls::Controls(State *s) {
+Controls::Controls(State *s)
+{
     localState = s;
 }
 
@@ -71,18 +77,23 @@ glm::vec2 transform_mouse(glm::vec2 in)
 }
 
 glm::vec2 prev_mouse(-2.f);
-template <typename T> int sgn(T val) {
+template <typename T>
+int sgn(T val)
+{
     return (T(0) < val) - (val < T(0));
 }
 
 void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 {
+    
     localState->deltaX = localState->deltaY = 0.0f;
-    if (localState->cursorStarted){
+    if (localState->cursorStarted)
+    {
         localState->deltaX += xpos - localState->x;
         localState->deltaY += ypos - localState->y;
     }
-    else localState->cursorStarted = true;
+    else
+        localState->cursorStarted = true;
     localState->x = xpos;
     localState->y = ypos;
     if (localState->cursorLocked)
@@ -127,6 +138,7 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 
         localState->arcBallCamera->setCameraView(finalPosition, localState->arcBallCamera->lookat, localState->arcBallCamera->up);
     }
+
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && localState->pickedObject == -1)
     {
         glm::vec2 click = glm::vec2(xpos, ypos) - prev_mouse;
@@ -136,12 +148,19 @@ void cursorCallback(GLFWwindow *window, double xpos, double ypos)
         glm::vec3 pan = (localState->arcBallCamera->up * -click.y + right * click.x) * 0.005f * 1.0f * length;
         localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos - pan, localState->arcBallCamera->lookat - pan, localState->arcBallCamera->up);
     }
+
     prev_mouse = {xpos, ypos};
 }
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-    if (localState->cursorLocked) return;
+    if (localState->cursorLocked)
+        return;
+
+    glm::vec3 ray_start = localState->arcBallCamera->pos;
+    glm::vec3 ray_dir = localState->arcBallCamera->raycastFromViewportCoords(localState->dx, localState->dy);
+    glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
+
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         unsigned char data[4];
@@ -149,16 +168,12 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         glfwGetCursorPos(window, &x, &y);
         // Do nothing if user clicked on GUI
         if (x < Window::_width / 6.0f || x > Window::_width - Window::_width / 6.0f)
-        {
             return;
-        }
-        glm::vec3 ray_start = localState->arcBallCamera->pos;
-        glm::vec3 ray_dir = localState->arcBallCamera->raycastFromViewportCoords(localState->dx, localState->dy);
-        glm::vec3 ray_end = ray_start + ray_dir * 1000.0f;
+        
         int pickedID = -1;
         for (int i = 0; i < localState->scene->objects.size(); i++)
         {
-            Cube *cube = dynamic_cast<Cube*>(localState->scene->objects[i]);
+            Cube *cube = dynamic_cast<Cube *>(localState->scene->objects[i]);
             if (cube != nullptr)
             {
                 float t;
@@ -166,6 +181,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
                     pickedID = i;
             }
         }
+        
         localState->pickedObject = pickedID;
 
         if (pickedID > localState->scene->objects.size())
@@ -174,20 +190,52 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         }
         else
         {
-            localState->pickedObject = pickedID;
-            localState->scene->objects[pickedID]->start_move(localState);
+            if (!localState->isInsert)
+            {
+                localState->pickedObject = pickedID;
+                localState->scene->objects[pickedID]->start_move(localState);
+            }
         }
+    
+        
+        if (localState->isInsert)
+        {
+            float intersect_distance;
+            glm::intersectRayPlane(ray_start, ray_dir, glm::vec3(0,0,0), glm::vec3(0,0,1), intersect_distance);
+            glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
+            glm::vec2 relation = glm::vec2(intersect_pos.x,intersect_pos.y) - localState->wardrobeGenerator->origin;
+            auto[c,origin,localpos] = localState->root.to_local_claster(relation);
+            if (c)
+            {
+                c->split(localpos.x,localState->wardrobeGenerator->boardThickness,true);
+                origin.x += localpos.x;
+                origin += localState->wardrobeGenerator->origin;
+                auto *obj = new WardrobeVerticalElement(glm::vec3(origin.x,origin.y,-localState->wardrobeGenerator->depth) ,c,localState->wardrobeGenerator->depth,localState->wardrobeGenerator->origin.x);
+                obj->texture = localState->wardrobeTextures.at("res/textures/woodTexture.jpg");
+                obj->generateVAO();
+                localState->scene->addObject(obj);
+                localState->isInsert = false;
+            }
+        }
+
+
     }
     else
     {
         if (localState->pickedObject != -1)
+        {
             localState->scene->objects[localState->pickedObject]->end_move();
+        }
+        
+
+
+        
         // If we set pickedObject to -1 here, object will be unpicked on left mouse button release
         //localState->pickedObject = -1;
     }
 }
 
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
     localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->lookat + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->up);
     localState->arcBallCamera->zoom += yoffset;
@@ -199,3 +247,4 @@ void resizeCallback(GLFWwindow *window, int width, int height)
     Window::_width = width;
     Window::_height = height;
 }
+
