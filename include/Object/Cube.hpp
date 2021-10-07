@@ -21,6 +21,10 @@ public:
     } movement_plane;
     glm::vec3 origin_offset;
 
+    glm::vec3 constraint_min;
+    glm::vec3 constraint_max;
+    
+
     void start_move(State *state);
     void end_move();
 

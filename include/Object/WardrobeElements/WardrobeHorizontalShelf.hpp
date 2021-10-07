@@ -6,9 +6,12 @@
 #define FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
 
 #include <Object/Cube.hpp>
+#include "Cluster.h"
 
 class WardrobeHorizontalShelf : public Cube
 {
+private:
+    Cluster* c;
 public:
     WardrobeHorizontalShelf(glm::vec3 position, glm::vec3 size) : Cube(position, size) { moveAxis = {0, 1, 0}; };
     void update(State *state, size_t currentId) override;
