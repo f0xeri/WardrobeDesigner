@@ -18,7 +18,7 @@ int inline InBox( glm::vec3 Hit, glm::vec3 B1, glm::vec3 B2, const int Axis);
 bool checkRayCubeIntercection(glm::vec3 B1, glm::vec3 B2, glm::vec3 L1, glm::vec3 L2, glm::vec3 &Hit);
 bool within(glm::vec3 min, glm::vec3 max, glm::vec3 v);
 
-#define EPS 0.0000001
+#define EPS 0.0001
 #define FLOAT_EQUAL(a, b) (fabs(a - b) < EPS)
 
 

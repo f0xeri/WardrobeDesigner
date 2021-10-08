@@ -277,7 +277,7 @@ void Window::startLoop()
 
     state->wardrobeGenerator = new WardrobeGenerator({0, 0, 0}, 1500_mm, 2400_mm, 600_mm, 16_mm, 132_mm, woodTexture);
     
-    state->cm = Claster_manager(
+    state->cm = ClusterManager(
         glm::vec3(  state->wardrobeGenerator->width - state->wardrobeGenerator->boardThickness * 2,
                     state->wardrobeGenerator->height - state->wardrobeGenerator->baseHeight - state->wardrobeGenerator->boardThickness,
                     state->wardrobeGenerator->depth),

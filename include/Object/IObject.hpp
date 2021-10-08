@@ -29,6 +29,7 @@ public:
     glm::vec3 startPosition;
     glm::mat4 model;
     bool picked;
+    bool enabled = true;
     glm::vec3 moveAxis;
     struct plane_t
     {

@@ -7,6 +7,7 @@
 #include <Logger.hpp>
 #include <imgui_internal.h>
 #include "GUIRenderer.hpp"
+#include "Algorythm.h"
 
 GUIRenderer::GUIRenderer(GLFWwindow *window)
 {
@@ -259,6 +260,43 @@ void GUIRenderer::renderWardrobeMenu(State *state)
     }
     ImGui::End();
 }
+
+
+std::vector<std::vector<int>> convertDataForAlg(State *state)
+{
+    std::vector<std::vector<int>> ret;
+    for (auto& object : state->scene->objects)
+    {
+        if ((dynamic_cast<WardrobeEdge*>(object) || dynamic_cast<WardrobeHorizontalShelf*>(object) || dynamic_cast<WardrobeVerticalElement*>(object)) && object->enabled)
+        {
+            std::vector<int> rect { 0, 0, 0, 0 };
+            Cube* obj = dynamic_cast<Cube*>(object);
+
+            bool f = false;
+            if (!FLOAT_EQUAL(obj->size.x, state->wardrobeGenerator->boardThickness))
+            {
+                rect.push_back(obj->size.x * 320.0f);
+                std::cout << obj->size.x * 320.0f << " ";
+            }
+            if (!FLOAT_EQUAL(obj->size.y, state->wardrobeGenerator->boardThickness))
+            {
+                rect.push_back(obj->size.y * 320.0f);
+                std::cout << obj->size.y * 320.0f << " ";
+            }
+            if (!FLOAT_EQUAL(obj->size.z, state->wardrobeGenerator->boardThickness))
+            {
+                rect.push_back(obj->size.z * 320.0f);
+                std::cout << obj->size.z * 320.0f << " ";
+            }
+
+            std::cout << "\n";
+            if (rect.size() <= 6)
+                ret.push_back(rect);
+        }
+    }
+    return ret;
+}
+
 int width = 0, height = 0, depth = 0, boardThickness = 0, baseHeight = 0;
 void GUIRenderer::renderMenuBar(State *state)
 {
@@ -281,7 +319,8 @@ void GUIRenderer::renderMenuBar(State *state)
             }
             if (ImGui::MenuItem("Экспортировать развертку"))
             {
-
+                auto data = convertDataForAlg(state);
+                algorythm(data, 2750, 1830, state->wardrobeGenerator->boardThickness);
             }
             ImGui::EndMenu();
         }

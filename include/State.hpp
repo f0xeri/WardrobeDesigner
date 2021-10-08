@@ -22,7 +22,7 @@ struct State
     ArcBallCamera *arcBallCamera;
     Scene *scene;
     WardrobeGenerator *wardrobeGenerator;
-    Claster_manager cm;
+    ClusterManager cm;
     std::map<std::string, Texture*> wardrobeTextures;
 
     float deltaX = 0.0f;

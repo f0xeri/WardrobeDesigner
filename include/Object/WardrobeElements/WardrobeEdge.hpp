@@ -11,8 +11,6 @@
 class WardrobeEdge : public Cube
 {
 public:
-    bool enabled = true;
-
     WardrobeEdge(glm::vec3 position, glm::vec3 size) : Cube(position, size) {};
     void update(State *state, size_t currentId) override;
     void draw() override;
