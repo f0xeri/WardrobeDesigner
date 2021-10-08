@@ -225,20 +225,18 @@ void GUIRenderer::renderWardrobeMenu(State *state)
             {
                 case 0:
                 {
-                    state->isInsert = true;
+                    state->toInsert = 1;
                     state->pickedObject = -1;
                     break;
                 }
                 case 1:
                 {
-                    auto *obj = new WardrobeHorizontalShelf({state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->height / 2 + state->wardrobeGenerator->baseHeight, -state->wardrobeGenerator->depth},
-                                                            {state->wardrobeGenerator->width - 2 * state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->boardThickness, state->wardrobeGenerator->depth});
-                    obj->texture = state->wardrobeTextures.at("res/textures/woodTexture.jpg");
-                    obj->generateVAO();
-                    state->scene->addObject(obj);
+                    state->toInsert = 2;
+                    state->pickedObject = -1;
                     break;
                 }
                 default:
+                    state->toInsert = 0;
                     break;
             }
         }

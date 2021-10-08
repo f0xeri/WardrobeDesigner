@@ -9,7 +9,6 @@
 #include <glm/glm.hpp>
 #include <Object/Cube.hpp>
 #include <Object/WardrobeElements/WardrobeEdge.hpp>
-#include "Cluster.h"
 
 class WardrobeGenerator {
 
@@ -19,7 +18,7 @@ public:
     WardrobeEdge *topSide;
     WardrobeEdge *leftSide;
     WardrobeEdge *rightSide;
-    glm::vec2 origin;
+    glm::vec3 origin;
     long double width, height, depth, boardThickness, baseHeight;
 
     WardrobeGenerator(glm::vec3 pos, long double width, long double height, long double depth, long double boardThickness, long double baseHeight, Texture *texture);

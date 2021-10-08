@@ -13,20 +13,20 @@
 class WardrobeVerticalElement : public Cube
 {
 private:
-    
-    float offset;
+    Claster* c;
     float prev_pos;
+    Claster_manager* cm;
 public:
-    Cluster* c;
-    WardrobeVerticalElement(glm::vec3 position,Cluster* c, float depth,float offset) : 
-        Cube(position, glm::vec3(c->separator_width,c->claster_scale.y,depth)), offset(offset),
-        c(c) 
+    WardrobeVerticalElement(Claster* c, Claster_manager* cm) : c(c), Cube(glm::vec3(),glm::vec3())
     {
-        constraint_min = {c->BMin + offset,-1000,-1000};
-        constraint_max = {c->BMax + offset,1000,1000};
-
+        this->cm = cm;
+        size = cm->get_scale(c);
+        position = cm->get_pos(c);
         moveAxis = {1, 0, 0};
+        constraint_min = {-1000,-1000,-1000};
+        constraint_max = {1000,1000,1000};
     };
+
     void update(State *state, size_t currentId) override;
     void draw() override;
     void start_move(State* s) override;

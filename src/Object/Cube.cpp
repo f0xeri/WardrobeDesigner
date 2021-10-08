@@ -198,8 +198,8 @@ void Cube::update(State *state, size_t currentId)
 
         intersect_pos = intersect_pos - origin_offset;
 
-        if (!within(constraint_min, constraint_max, intersect_pos))
-            return;
+        //if (!within(constraint_min, constraint_max, intersect_pos))
+        //    return;
 
         if (moveAxis.x != 0)
         {
