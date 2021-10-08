@@ -6,7 +6,6 @@
 #define FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
 
 
-
 #include <Object/Cube.hpp>
 #include "Tools.hpp"
 #include "Cluster.h"
@@ -14,10 +13,10 @@
 class WardrobeHorizontalShelf : public Cube
 {
 private:
-    Cluster* c;
     float prev_pos;
     ClusterManager* cm;
 public:
+    Cluster* c;
     WardrobeHorizontalShelf(Cluster* c, ClusterManager* cm) : c(c), Cube(glm::vec3(), glm::vec3())
     {
         this->cm = cm;
@@ -34,7 +33,6 @@ public:
     void end_move() override;
     
 };
-
 
 
 #endif //FOXENGINE_WARDROBEHORIZONTALSHELF_HPP

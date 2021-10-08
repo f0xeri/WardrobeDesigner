@@ -16,13 +16,15 @@ class Cluster
 private:
     glm::vec2 lower;
     glm::vec2 upper;
+
     Cluster *firstChild;
     Cluster *secondChild;
     Cluster *parent;
 
 public:
-
+    IObject* linked_object;
     bool isRoot()
+
     {
         return parent == nullptr;
     }
@@ -192,6 +194,35 @@ public:
 
         for (Cluster *cluster : lower_clusters)
             cluster->upper[target] += delta;
+    }
+
+    std::vector<Cluster*> getClustersToDelete(Cluster* c)
+    {
+        std::vector<Cluster*> to_delete = std::vector<Cluster*>();
+        std::stack<Cluster*> s = std::stack<Cluster*>();
+        s.push(c->firstChild);
+        s.push(c->secondChild);
+        while(!s.empty())
+        {
+            Cluster* current = s.top(); s.pop();
+            to_delete.push_back(current);
+            if (!current->is_leaf())
+            {
+                s.push(current->firstChild);
+                s.push(current->secondChild);
+            }
+        }
+
+        c->firstChild = nullptr;
+        c->secondChild = nullptr;
+        
+        for (auto c : to_delete)
+        {
+            clasters.erase(std::remove(clusters.begin(), clusters.end(), c), clusters.end());
+        }
+        
+
+        return to_delete;
     }
 
     ClusterManager() = default;

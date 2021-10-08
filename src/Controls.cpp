@@ -220,6 +220,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
                 obj->generateVAO();
                 localState->scene->addObject(obj);
                 localState->toInsert = 0;
+                c->linked_object = obj;
             }
         }
     }

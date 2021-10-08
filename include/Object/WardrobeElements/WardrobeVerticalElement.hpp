@@ -12,11 +12,11 @@
 
 class WardrobeVerticalElement : public Cube
 {
-private:
-    Cluster* c;
+private:  
     float prev_pos;
     ClusterManager* cm;
 public:
+    Claster* c;
     WardrobeVerticalElement(Cluster* c, ClusterManager* cm) : c(c), Cube(glm::vec3(), glm::vec3())
     {
         this->cm = cm;
