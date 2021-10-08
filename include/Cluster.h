@@ -19,9 +19,9 @@ private:
     Claster *firstChild;
     Claster *secondChild;
     Claster *parent;
-
+    
 public:
-
+    IObject* linked_object;
     bool is_root()
     {
         return parent == nullptr;
@@ -192,6 +192,35 @@ public:
 
         for (Claster *claster : lower_clusters)
             claster->upper[target] += delta;
+    }
+
+    std::vector<Claster*> get_clasters_to_delete(Claster* c)
+    {
+        std::vector<Claster*> to_delete = std::vector<Claster*>();
+        std::stack<Claster*> s = std::stack<Claster*>();
+        s.push(c->firstChild);
+        s.push(c->secondChild);
+        while(!s.empty())
+        {
+            Claster* current = s.top(); s.pop();
+            to_delete.push_back(current);
+            if (!current->is_leaf())
+            {
+                s.push(current->firstChild);
+                s.push(current->secondChild);
+            }
+        }
+
+        c->firstChild = nullptr;
+        c->secondChild = nullptr;
+        
+        for (auto c : to_delete)
+        {
+            clasters.erase(std::remove(clasters.begin(), clasters.end(), c), clasters.end());
+        }
+        
+
+        return to_delete;
     }
 
     Claster_manager() = default;

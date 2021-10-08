@@ -14,10 +14,11 @@
 class WardrobeHorizontalShelf : public Cube
 {
 private:
-    Claster* c;
+    
     float prev_pos;
     Claster_manager* cm;
 public:
+    Claster* c;
     WardrobeHorizontalShelf(Claster* c, Claster_manager* cm) : c(c), Cube(glm::vec3(),glm::vec3())
     {
         this->cm = cm;

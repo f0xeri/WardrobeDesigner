@@ -18,7 +18,6 @@ set(SRC ${PROJECT_SOURCE_DIR}/src/main.cpp
         ${PROJECT_SOURCE_DIR}/src/Texture.cpp
         ${PROJECT_SOURCE_DIR}/src/ObjectLoader.cpp
         ${PROJECT_SOURCE_DIR}/src/Camera.cpp
-        ${PROJECT_SOURCE_DIR}/src/Cluster.cpp
         ${PROJECT_SOURCE_DIR}/src/Shader.cpp
         ${PROJECT_SOURCE_DIR}/src/MousePicker.cpp
         ${PROJECT_SOURCE_DIR}/src/Texture.cpp
