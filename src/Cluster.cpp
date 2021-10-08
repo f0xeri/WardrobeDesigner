@@ -43,7 +43,7 @@ void Cluster::constraint_by_children(float &max_up_border, float &max_down_borde
             s.push({p.first->secondChild, p.second});
             if (p.first->isVertical == isVertical)
             {
-                s.push({p.first->firstChild, p.second - (p.first->claster_scale[!isVertical] - p.first->separator_offset + p.first->separator_width)});
+                s.push({p.first->firstChild, p.second - (p.first->claster_scale[!isVertical] - p.first->separator_offset /* + p.first->separator_width*/)});
             }
             else
             {
@@ -61,11 +61,12 @@ void Cluster::constraint_by_children(float &max_up_border, float &max_down_borde
     max_up_border += relative_up_border;
 }
 
-Cluster::Cluster(float width, float height, Cluster *parent)
+Cluster::Cluster(float width, float height, glm::vec2 origin, Cluster *parent)
 {
     firstChild = nullptr;
     secondChild = nullptr;
     this->parent = parent;
+    this->origin = origin;
     isVertical = false;
     separator_offset = 0;
     separator_width = 0;
@@ -79,13 +80,13 @@ void Cluster::split(float separator_offset, float separator_width, bool isVertic
     this->isVertical = isVertical;
     if (isVertical)
     {
-        firstChild = new Cluster(separator_offset, claster_scale.y, this);
-        secondChild = new Cluster(claster_scale.x - separator_offset - separator_width, claster_scale.y, this);
+        firstChild = new Cluster(separator_offset, claster_scale.y,origin, this);
+        secondChild = new Cluster(claster_scale.x - separator_offset - separator_width, claster_scale.y,origin + glm::vec2(separator_offset - separator_width,0), this);
     }
     else
     {
-        firstChild = new Cluster(claster_scale.x, separator_offset, this);
-        secondChild = new Cluster(claster_scale.x, claster_scale.y - separator_offset - separator_width, this);
+        firstChild = new Cluster(claster_scale.x, separator_offset,origin, this);
+        secondChild = new Cluster(claster_scale.x, claster_scale.y - separator_offset - separator_width,origin + glm::vec2(0,separator_offset - separator_width), this);
     }
     Cluster* c = this;
     while (!c->is_root())
@@ -100,10 +101,11 @@ void Cluster::find_constraints()
 {
     Cluster *c = this;
     std::vector<std::pair<Cluster *, bool>> v;
-    while (!c->is_root())
+    c = c->parent;
+    while (c)
     {
         if (c->isVertical == isVertical)
-            v.push_back({c->parent, c == c->parent->secondChild});
+            v.push_back({c, c == c->secondChild});
         c = c->parent;
     }
     float beg = 0;
@@ -195,6 +197,7 @@ void Cluster::move_separator(float delta)
     {
         c->claster_scale[!isVertical] -= delta;
         c->separator_offset -= delta;
+        origin[isVertical] += delta;
         c->BMin += delta;
     }
 

@@ -85,7 +85,7 @@ int sgn(T val)
 
 void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 {
-    
+
     localState->deltaX = localState->deltaY = 0.0f;
     if (localState->cursorStarted)
     {
@@ -169,7 +169,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         // Do nothing if user clicked on GUI
         if (x < Window::_width / 6.0f || x > Window::_width - Window::_width / 6.0f)
             return;
-        
+
         int pickedID = -1;
         for (int i = 0; i < localState->scene->objects.size(); i++)
         {
@@ -181,7 +181,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
                     pickedID = i;
             }
         }
-        
+
         localState->pickedObject = pickedID;
 
         if (pickedID > localState->scene->objects.size())
@@ -190,35 +190,37 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         }
         else
         {
-            if (!localState->isInsert)
+            if (!localState->toInsert)
             {
                 localState->pickedObject = pickedID;
                 localState->scene->objects[pickedID]->start_move(localState);
             }
         }
-    
-        
-        if (localState->isInsert)
+
+        if (localState->toInsert)
         {
             float intersect_distance;
-            glm::intersectRayPlane(ray_start, ray_dir, glm::vec3(0,0,0), glm::vec3(0,0,1), intersect_distance);
+            glm::intersectRayPlane(ray_start, ray_dir, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), intersect_distance);
             glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
-            glm::vec2 relation = glm::vec2(intersect_pos.x,intersect_pos.y) - localState->wardrobeGenerator->origin;
-            auto[c,origin,localpos] = localState->root.to_local_claster(relation);
+
+            Claster *c = localState->cm.try_split(intersect_pos, localState->wardrobeGenerator->boardThickness, localState->toInsert == 1);
             if (c)
             {
-                c->split(localpos.x,localState->wardrobeGenerator->boardThickness,true);
-                origin.x += localpos.x;
-                origin += localState->wardrobeGenerator->origin;
-                auto *obj = new WardrobeVerticalElement(glm::vec3(origin.x,origin.y,-localState->wardrobeGenerator->depth) ,c,localState->wardrobeGenerator->depth,localState->wardrobeGenerator->origin.x);
+                IObject *obj;
+                if (localState->toInsert == 1)
+                {
+                    obj = new WardrobeVerticalElement(c, &localState->cm);
+                }
+                else if (localState->toInsert == 2)
+                {
+                    obj = new WardrobeHorizontalShelf(c,&localState->cm);
+                }
                 obj->texture = localState->wardrobeTextures.at("res/textures/woodTexture.jpg");
                 obj->generateVAO();
                 localState->scene->addObject(obj);
-                localState->isInsert = false;
+                localState->toInsert = 0;
             }
         }
-
-
     }
     else
     {
@@ -226,10 +228,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
         {
             localState->scene->objects[localState->pickedObject]->end_move();
         }
-        
 
-
-        
         // If we set pickedObject to -1 here, object will be unpicked on left mouse button release
         //localState->pickedObject = -1;
     }
@@ -247,4 +246,3 @@ void resizeCallback(GLFWwindow *window, int width, int height)
     Window::_width = width;
     Window::_height = height;
 }
-

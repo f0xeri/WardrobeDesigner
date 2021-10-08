@@ -276,9 +276,13 @@ void Window::startLoop()
     floor->generateVAO();
 
     state->wardrobeGenerator = new WardrobeGenerator({0, 0, 0}, 1500_mm, 2400_mm, 600_mm, 16_mm, 132_mm, woodTexture);
-    state->root = Cluster(
-        state->wardrobeGenerator->width - 2 * state->wardrobeGenerator->boardThickness,
-        state->wardrobeGenerator->height - state->wardrobeGenerator->baseHeight - state->wardrobeGenerator->boardThickness);
+    
+    state->cm = Claster_manager(
+        glm::vec3(  state->wardrobeGenerator->width - state->wardrobeGenerator->boardThickness * 2,
+                    state->wardrobeGenerator->height - state->wardrobeGenerator->baseHeight - state->wardrobeGenerator->boardThickness,
+                    state->wardrobeGenerator->depth),
+        state->wardrobeGenerator->origin);
+
     vec3 lightPos(15.0f, 25.0f, -20.0f);
 
     auto skybox = genSkyboxVAO();
@@ -345,19 +349,6 @@ void Window::startLoop()
     while (!glfwWindowShouldClose(mainWindow))
     {
         showFPS(mainWindow);
-
-        int i = 0;
-        for (auto o : state->scene->objects)
-        {
-            WardrobeVerticalElement* c = (WardrobeVerticalElement*)o;
-            if(i > 5)
-            LOG("object: " + std::to_string(i) + 
-            " second = " + std::to_string(c->c->secondChild->claster_scale.x) + 
-            " first = " + std::to_string(c->c->firstChild->claster_scale.x) + 
-            " pos = " + std::to_string(c->c->separator_offset))
-            i++;
-        }
-
         double currentTime = glfwGetTime();
         state->deltaTime = glfwGetTime() - lastTime;
         lastTime = currentTime;

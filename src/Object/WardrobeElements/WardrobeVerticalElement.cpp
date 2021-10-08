@@ -3,13 +3,12 @@
 //
 
 #include "Object/WardrobeElements/WardrobeVerticalElement.hpp"
+#include "Logger.hpp"
 
 void WardrobeVerticalElement::update(State *state, size_t currentId) {
-    size.x = c->separator_width;
-    size.y = c->claster_scale.y;
-    constraint_min.x = c->BMin + offset;
-    constraint_max.x = c->BMax - c->separator_width + offset;
-
+    size = cm->get_scale(c);
+    if(!picked)
+        position = cm->get_pos(c);
     Cube::update(state, currentId);
 }
 
@@ -25,7 +24,7 @@ void WardrobeVerticalElement::start_move(State* s)
 
 void WardrobeVerticalElement::end_move()
 {
-    c->move_separator(position.x - prev_pos);
+    cm->try_move_separator(c,position.x - prev_pos);
     prev_pos = position.x;
     Cube::end_move();
 }

@@ -5,18 +5,36 @@
 #ifndef FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
 #define FOXENGINE_WARDROBEHORIZONTALSHELF_HPP
 
+
+
 #include <Object/Cube.hpp>
+#include "Tools.hpp"
 #include "Cluster.h"
 
 class WardrobeHorizontalShelf : public Cube
 {
 private:
-    Cluster* c;
+    Claster* c;
+    float prev_pos;
+    Claster_manager* cm;
 public:
-    WardrobeHorizontalShelf(glm::vec3 position, glm::vec3 size) : Cube(position, size) { moveAxis = {0, 1, 0}; };
+    WardrobeHorizontalShelf(Claster* c, Claster_manager* cm) : c(c), Cube(glm::vec3(),glm::vec3())
+    {
+        this->cm = cm;
+        size = cm->get_scale(c);
+        position = cm->get_pos(c);
+        moveAxis = {0, 1, 0};
+        constraint_min = {-1000,-1000,-1000};
+        constraint_max = {1000,1000,1000};
+    };
+
     void update(State *state, size_t currentId) override;
     void draw() override;
+    void start_move(State* s) override;
+    void end_move() override;
+    
 };
+
 
 
 #endif //FOXENGINE_WARDROBEHORIZONTALSHELF_HPP

@@ -10,7 +10,7 @@
 #include "Scene.hpp"
 #include "WardrobeGenerator.hpp"
 #include "ArcBallCamera.hpp"
-
+#include "Cluster.h"
 
 struct State
 {
@@ -22,7 +22,7 @@ struct State
     ArcBallCamera *arcBallCamera;
     Scene *scene;
     WardrobeGenerator *wardrobeGenerator;
-    Cluster root;
+    Claster_manager cm;
     std::map<std::string, Texture*> wardrobeTextures;
 
     float deltaX = 0.0f;
@@ -40,7 +40,7 @@ struct State
     bool cursorStarted = false;
     bool showDebug = true;
 
-    bool isInsert = false;
+    int toInsert = 0;
 
     float camX = 0.0f;
     float camY = 0.0f;
