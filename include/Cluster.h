@@ -22,17 +22,17 @@ private:
 
 public:
 
-    bool is_root()
+    bool isRoot()
     {
         return parent == nullptr;
     }
 
-    bool is_leaf()
+    bool isLeaf()
     {
         return firstChild == nullptr;
     }
 
-    bool is_vertical()
+    bool isVertical()
     {
         return FLOAT_EQUAL(firstChild->lower.y,secondChild->lower.y);
     }
@@ -46,7 +46,7 @@ public:
         this->upper = upper;
     }
 
-    void split_test(float separator_offset, float separator_width, bool isVertical)
+    void splitTest(float separator_offset, float separator_width, bool isVertical)
     {
         if (isVertical)
         {
@@ -76,12 +76,12 @@ public:
 
     Cluster *toLocalCluster(glm::vec2 pos)
     {
-        if (is_leaf())
+        if (isLeaf())
         {
             return this;
         }
 
-        int target = !is_vertical();
+        int target = !isVertical();
 
         if (pos[target] < firstChild->upper[target])
         {
@@ -114,14 +114,14 @@ private:
 public:
     glm::vec3 getPos(Cluster *c)
     {
-        if(c->is_vertical())
+        if(c->isVertical())
             return glm::vec3(c->firstChild->upper.x, c->firstChild->lower.y,-depth);
         return glm::vec3(c->firstChild->lower.x, c->firstChild->upper.y,-depth);
     }
 
     glm::vec3 getScale(Cluster *c)
     {
-        if (c->is_vertical())
+        if (c->isVertical())
         {
             return glm::vec3((c->firstChild->upper.x - c->secondChild->lower.x) * -1, c->upper.y - c->lower.y, depth);
         }
@@ -154,7 +154,7 @@ public:
 
     void tryMoveSeparator(Cluster *c, float delta)
     {
-        int target = !c->is_vertical();
+        int target = !c->isVertical();
         std::vector<Cluster *> upper_clusters;
         std::vector<Cluster *> lower_clusters;
 
