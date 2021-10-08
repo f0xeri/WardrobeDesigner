@@ -6,9 +6,9 @@
 #include "Logger.hpp"
 
 void WardrobeVerticalElement::update(State *state, size_t currentId) {
-    size = cm->get_scale(c);
+    size = cm->getScale(c);
     if(!picked)
-        position = cm->get_pos(c);
+        position = cm->getPos(c);
     Cube::update(state, currentId);
 }
 
@@ -24,7 +24,7 @@ void WardrobeVerticalElement::start_move(State* s)
 
 void WardrobeVerticalElement::end_move()
 {
-    cm->try_move_separator(c,position.x - prev_pos);
+    cm->tryMoveSeparator(c, position.x - prev_pos);
     prev_pos = position.x;
     Cube::end_move();
 }

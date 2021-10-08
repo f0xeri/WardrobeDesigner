@@ -14,15 +14,15 @@
 class WardrobeHorizontalShelf : public Cube
 {
 private:
-    Claster* c;
+    Cluster* c;
     float prev_pos;
-    Claster_manager* cm;
+    ClusterManager* cm;
 public:
-    WardrobeHorizontalShelf(Claster* c, Claster_manager* cm) : c(c), Cube(glm::vec3(),glm::vec3())
+    WardrobeHorizontalShelf(Cluster* c, ClusterManager* cm) : c(c), Cube(glm::vec3(), glm::vec3())
     {
         this->cm = cm;
-        size = cm->get_scale(c);
-        position = cm->get_pos(c);
+        size = cm->getScale(c);
+        position = cm->getPos(c);
         moveAxis = {0, 1, 0};
         constraint_min = {-1000,-1000,-1000};
         constraint_max = {1000,1000,1000};

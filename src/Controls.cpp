@@ -203,7 +203,8 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
             glm::intersectRayPlane(ray_start, ray_dir, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), intersect_distance);
             glm::vec3 intersect_pos = ray_start + ray_dir * intersect_distance;
 
-            Claster *c = localState->cm.try_split(intersect_pos, localState->wardrobeGenerator->boardThickness, localState->toInsert == 1);
+            Cluster *c = localState->cm.trySplit(intersect_pos, localState->wardrobeGenerator->boardThickness,
+                                                 localState->toInsert == 1);
             if (c)
             {
                 IObject *obj;

@@ -5,9 +5,9 @@
 #include "Object/WardrobeElements/WardrobeHorizontalShelf.hpp"
 
 void WardrobeHorizontalShelf::update(State *state, size_t currentId) {
-    size = cm->get_scale(c);
+    size = cm->getScale(c);
     if(!picked)
-        position = cm->get_pos(c);
+        position = cm->getPos(c);
     Cube::update(state, currentId);
 }
 
@@ -23,7 +23,7 @@ void WardrobeHorizontalShelf::start_move(State* s)
 
 void WardrobeHorizontalShelf::end_move()
 {
-    cm->try_move_separator(c,position.y - prev_pos);
+    cm->tryMoveSeparator(c, position.y - prev_pos);
     prev_pos = position.y;
     Cube::end_move();
 }
