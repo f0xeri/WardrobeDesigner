@@ -23,7 +23,7 @@ void WardrobeHorizontalShelf::start_move(State* s)
 
 void WardrobeHorizontalShelf::end_move()
 {
-    cm->tryMoveSeparator(c, position.y - prev_pos);
+    cm->tryMoveSeparator(c, from_mm(position.y - prev_pos));
     prev_pos = position.y;
     Cube::end_move();
 }

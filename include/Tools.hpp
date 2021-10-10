@@ -10,7 +10,7 @@
 long double operator "" _mm(long double mm);
 long double operator "" _mm(unsigned long long mm);
 float from_mm(float mm);
-long double from_mm(int mm);
+//long double from_mm(int mm);
 float to_mm(float mm);
 long double to_mm(int mm);
 int inline GetIntersection(float fDst1, float fDst2, glm::vec3 P1, glm::vec3 P2, glm::vec3 &Hit);

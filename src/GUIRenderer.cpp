@@ -97,9 +97,9 @@ void GUIRenderer::renderSettings(State *state)
         float y = from_mm(state->scene->objects[state->pickedObject]->position.y);
         float z = from_mm(state->scene->objects[state->pickedObject]->position.z);
 
-        ImGui::InputFloat("pos x", &x, 1.0f);
-        ImGui::InputFloat("pos y", &y, 1.0f);
-        ImGui::InputFloat("pos z", &z, 1.0f);
+        ImGui::InputFloat("pos x", &x, 1.001f);
+        ImGui::InputFloat("pos y", &y, 1.001f);
+        ImGui::InputFloat("pos z", &z, 1.001f);
 
         // If picked object is cube or derived of cube we can get and set size
         Cube *object = dynamic_cast<Cube *>(state->scene->objects[state->pickedObject]);
