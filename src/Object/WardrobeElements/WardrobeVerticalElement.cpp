@@ -24,7 +24,7 @@ void WardrobeVerticalElement::start_move(State* s)
 
 void WardrobeVerticalElement::end_move()
 {
-    cm->tryMoveSeparator(c, position.x - prev_pos);
+    cm->tryMoveSeparator(c, from_mm(position.x - prev_pos));
     prev_pos = position.x;
     Cube::end_move();
 }
