@@ -198,15 +198,15 @@ public:
 
     std::vector<Cluster*> getClustersToDelete(Cluster* c)
     {
-        std::vector<Cluster*> to_delete = std::vector<Cluster*>();
+        std::vector<Cluster*> toDelete = std::vector<Cluster*>();
         std::stack<Cluster*> s = std::stack<Cluster*>();
         s.push(c->firstChild);
         s.push(c->secondChild);
         while(!s.empty())
         {
             Cluster* current = s.top(); s.pop();
-            to_delete.push_back(current);
-            if (!current->is_leaf())
+            toDelete.push_back(current);
+            if (!current->isLeaf())
             {
                 s.push(current->firstChild);
                 s.push(current->secondChild);
@@ -216,21 +216,16 @@ public:
         c->firstChild = nullptr;
         c->secondChild = nullptr;
         
-        for (auto c : to_delete)
+        for (auto &cluster : toDelete)
         {
-            clasters.erase(std::remove(clusters.begin(), clusters.end(), c), clusters.end());
+            clusters.erase(std::remove(clusters.begin(), clusters.end(), cluster), clusters.end());
         }
-        
 
-        return to_delete;
+        return toDelete;
     }
 
     ClusterManager() = default;
-
-    ~ClusterManager()
-    {
-
-    }
+    ~ClusterManager() = default;
 };
 
 #endif // CLUSTER_HH

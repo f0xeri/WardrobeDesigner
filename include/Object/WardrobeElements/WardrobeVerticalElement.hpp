@@ -16,7 +16,7 @@ private:
     float prev_pos;
     ClusterManager* cm;
 public:
-    Claster* c;
+    Cluster* c;
     WardrobeVerticalElement(Cluster* c, ClusterManager* cm) : c(c), Cube(glm::vec3(), glm::vec3())
     {
         this->cm = cm;

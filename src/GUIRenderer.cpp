@@ -178,27 +178,34 @@ void GUIRenderer::renderSettings(State *state)
         {
             auto deletable_object = (WardrobeHorizontalShelf*)state->scene->objects[state->pickedObject];
 
-            auto must_be_deleted = state->cm.get_clasters_to_delete(deletable_object->c);
+            auto must_be_deleted = state->cm.getClustersToDelete(deletable_object->c);
 
             while (!must_be_deleted.empty())
             {
                 auto c = must_be_deleted.back();
                 must_be_deleted.pop_back();
                 state->scene->objects.erase(
-                    std::remove(state->scene->objects.begin(), state->scene->objects.end(), c->linked_object), 
+                    std::remove(state->scene->objects.begin(), state->scene->objects.end(), c->linked_object),
                     state->scene->objects.end());
                 delete c;
             }
-            
+
 
             state->scene->objects.erase(state->scene->objects.begin() + state->pickedObject);
             state->pickedObject = -1;
         }
         else
         {
-            state->scene->objects[state->pickedObject]->position.x = to_mm(x);
-            state->scene->objects[state->pickedObject]->position.y = to_mm(y);
-            state->scene->objects[state->pickedObject]->position.z = to_mm(z);
+            if (!FLOAT_EQUAL(to_mm(x), state->scene->objects[state->pickedObject]->position.x) ||
+                !FLOAT_EQUAL(to_mm(y), state->scene->objects[state->pickedObject]->position.y) ||
+                !FLOAT_EQUAL(to_mm(z), state->scene->objects[state->pickedObject]->position.z))
+            {
+                state->scene->objects[state->pickedObject]->start_move(state);
+                state->scene->objects[state->pickedObject]->position.x = to_mm(x);
+                state->scene->objects[state->pickedObject]->position.y = to_mm(y);
+                state->scene->objects[state->pickedObject]->position.z = to_mm(z);
+                state->scene->objects[state->pickedObject]->end_move();
+            }
         }
 
         if (disabled)

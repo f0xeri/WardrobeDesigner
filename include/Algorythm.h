@@ -112,15 +112,16 @@ vector <Rectangle> cast_input_vector(vector<vector<int>> input)
 	}
 	return data;
 }
-void write_output(vector <Rectangle> data, int total_count, double percantage)
+void write_output(vector <Rectangle> data, int total_count, double percantage, int dsp_h)
 {
-	cout << "Total DSP count = " << total_count << " , Fill percentage = " << percantage << endl;
-	for (int i = 0; i < data.size(); ++i)
-	{
-		Rectangle r = data[i];
-		cout << "Rectangle w/h = " << r.width << " " << r.height << "Rectangle x/y =" << r.x << " " << r.y << endl;
-	}
+    cout << "Total DSP count = " << total_count << " , Fill percentage = " << percantage << endl;
+    for (int i = 0; i < data.size(); ++i)
+    {
+        Rectangle r = data[i];
+        cout << "Rectangle w/h = " << r.width << " " << r.height << "Rectangle x/y =" << r.x << " " << r.y << " DSP#" << (r.y / dsp_h) + 1 << endl;
+    }
 }
+
 void generate_some_file(string path)
 {
 	ofstream os(path);
@@ -253,7 +254,7 @@ vector <Rectangle> BF(vector <Rectangle> data, int dsp_w, int dsp_h, int& total_
 	int total_height = (levels[levels.size() - 1].cell_h + levels[levels.size() - 1].height);
 	total_count = total_height / dsp_h;
 	if ((levels[levels.size() - 1].cell_h + levels[levels.size() - 1].height) % dsp_h > 0) total_count++;
-	percentage = ((double)total_square(data) / dsp_w) / total_height;
+    percentage = ((double)total_square(data) / dsp_w) / (dsp_h * total_count);
 	return data;
 }
 vector <Rectangle> logic_part(vector <Rectangle> data, int dsp_w, int dsp_h, int saw_width, int& min_total, double& max_percent)
@@ -350,7 +351,7 @@ void algorythm()
 		cout << min_total << " " << max_percent << endl;
 		auto finish = chrono::steady_clock::now();
 		cout << "Time : " << chrono::duration_cast <chrono::milliseconds>(finish - start).count()  << "ms "<< endl;
-	write_output(best, min_total, max_percent);
+	write_output(best, min_total, max_percent, dsp_h);
 }
 void algorythm(vector<vector<int>> input, int dsp_w, int dsp_h, int saw_width = 10)
 {
@@ -382,5 +383,5 @@ void algorythm(vector<vector<int>> input, int dsp_w, int dsp_h, int saw_width = 
 	cout << min_total << " " << max_percent << endl;
 	auto finish = chrono::steady_clock::now();
 	cout << "Time : " << chrono::duration_cast <chrono::milliseconds>(finish - start).count() << "ms " << endl;
-	write_output(best, min_total, max_percent);
+	write_output(best, min_total, max_percent, dsp_h);
 }
