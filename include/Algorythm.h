@@ -65,6 +65,7 @@ public:
     unsigned int height;
     unsigned int x;
     unsigned int y;
+    unsigned int dspN;
     void rotate()
     {
         if (rotatable)
@@ -118,7 +119,7 @@ void write_output(vector <Rectangle> data, int total_count, double percantage, i
     for (int i = 0; i < data.size(); ++i)
     {
         Rectangle r = data[i];
-        cout << "Rectangle w/h = " << r.width << " " << r.height << "Rectangle x/y =" << r.x << " " << r.y << " DSP#" << (r.y / dsp_h) + 1 << endl;
+        cout << "Rectangle w/h = " << r.width << " " << r.height << "Rectangle x/y =" << r.x << " " << r.y << " DSP#" << r.dspN << endl;
     }
 }
 
@@ -353,7 +354,7 @@ void algorythm()
 		cout << "Time : " << chrono::duration_cast <chrono::milliseconds>(finish - start).count()  << "ms "<< endl;
 	write_output(best, min_total, max_percent, dsp_h);
 }
-void algorythm(vector<vector<int>> input, int dsp_w, int dsp_h, int saw_width = 10)
+std::pair<vector <Rectangle>, unsigned int> algorythm(vector<vector<int>> input, int dsp_w, int dsp_h, int saw_width = 10)
 {
 	vector <Rectangle> data = cast_input_vector(input);
 	for (int i = 0; i < data.size(); ++i)
@@ -382,6 +383,17 @@ void algorythm(vector<vector<int>> input, int dsp_w, int dsp_h, int saw_width = 
 	vector <Rectangle> best = logic_part(data, dsp_w, dsp_h, saw_width, min_total, max_percent);
 	cout << min_total << " " << max_percent << endl;
 	auto finish = chrono::steady_clock::now();
-	cout << "Time : " << chrono::duration_cast <chrono::milliseconds>(finish - start).count() << "ms " << endl;
+	cout << "Time : " << chrono::duration_cast<chrono::milliseconds>(finish - start).count() << "ms " << endl;
+    unsigned int dspNmax = 0;
+    for (auto &rect : best)
+    {
+        rect.dspN = (rect.y / dsp_h);
+        if (rect.dspN > dspNmax) dspNmax = rect.dspN;
+        if (rect.dspN > 0)
+        {
+            rect.y = rect.y - rect.dspN * dsp_h;
+        }
+    }
 	write_output(best, min_total, max_percent, dsp_h);
+    return {best, dspNmax + 1};
 }

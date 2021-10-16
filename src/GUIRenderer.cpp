@@ -9,6 +9,7 @@
 #include "GUIRenderer.hpp"
 #include "Algorythm.h"
 
+
 GUIRenderer::GUIRenderer(GLFWwindow *window)
 {
     IMGUI_CHECKVERSION();
@@ -305,9 +306,16 @@ std::vector<std::vector<int>> convertDataForAlg(State *state)
 }
 
 int width = 0, height = 0, depth = 0, boardThickness = 0, baseHeight = 0;
+bool exportImage = false;
+unsigned int dspCount = 0;
+unsigned int selectedDsp = 0;
+std::string currentDsp;
+std::vector<std::string> dspNames;
+std::vector<Texture*> dspTextures;
 void GUIRenderer::renderMenuBar(State *state)
 {
     bool newProject = false;
+
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Файл"))
@@ -326,8 +334,44 @@ void GUIRenderer::renderMenuBar(State *state)
             }
             if (ImGui::MenuItem("Экспортировать развертку"))
             {
+                exportImage = true;
                 auto data = convertDataForAlg(state);
-                algorythm(data, 2750, 1830, state->wardrobeGenerator->boardThickness);
+                auto res = algorythm(data, 2750, 1830, state->wardrobeGenerator->boardThickness);
+                dspCount = res.second;
+                for (int i = 0; i < dspCount; i++)
+                {
+                    dspTextures.push_back(Texture::createEmptyTexture(2750, 1830, 3, std::string("img" + std::to_string(i)).c_str()));
+                    for (unsigned int p = 0; p < 2750 * 1830 * 3; p++)
+                    {
+                        dspTextures[i]->data[p] = 255;
+                    }
+                }
+                for (auto &rect : res.first)
+                {
+                    for (unsigned int i = rect.x; i <= rect.x + rect.width; i++)
+                    {
+                        unsigned int location = (i + (rect.y * 2750)) * 3;
+                        dspTextures[rect.dspN]->data[location] = 0;
+                        dspTextures[rect.dspN]->data[location + 1] = 0;
+                        dspTextures[rect.dspN]->data[location + 2] = 0;
+                        location = (i + ((rect.y + rect.height) * 2750)) * 3;
+                        dspTextures[rect.dspN]->data[location] = 0;
+                        dspTextures[rect.dspN]->data[location + 1] = 0;
+                        dspTextures[rect.dspN]->data[location + 2] = 0;
+                    }
+                    for (unsigned int i = rect.y; i <= rect.y + rect.height; i++)
+                    {
+                        unsigned int location = ((rect.x + rect.width) + (i * 2750)) * 3;
+                        dspTextures[rect.dspN]->data[location] = 0;
+                        dspTextures[rect.dspN]->data[location + 1] = 0;
+                        dspTextures[rect.dspN]->data[location + 2] = 0;
+                        location = (rect.x + (i * 2750)) * 3;
+                        dspTextures[rect.dspN]->data[location] = 0;
+                        dspTextures[rect.dspN]->data[location + 1] = 0;
+                        dspTextures[rect.dspN]->data[location + 2] = 0;
+                    }
+                    dspTextures[rect.dspN]->updateTexture();
+                }
             }
             ImGui::EndMenu();
         }
@@ -338,6 +382,48 @@ void GUIRenderer::renderMenuBar(State *state)
         }
 
         float newProjWinX, newProjWinY, newProjWinW, newProjWinH;
+
+        newProjWinW = Window::_width / 3.0;
+        newProjWinH = Window::_height / 3.0;
+        newProjWinX = Window::_width / 2.0 - newProjWinW / 2.0;
+        newProjWinY = Window::_height / 2.0 - newProjWinH / 2.0;
+
+        ImGui::SetNextWindowPos({newProjWinX, newProjWinY}, ImGuiCond_Once);
+        ImGui::SetNextWindowSize({newProjWinW, newProjWinH}, ImGuiCond_Once);
+
+        if (exportImage)
+        {
+            ImGui::Begin("Экспорт развертки", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+            state->cursorLocked = true;
+            dspNames.clear();
+            for (int i = 0; i < dspCount; i++)
+            {
+                dspNames.push_back("Лист ДСП #" + std::to_string(i + 1));
+            }
+            if (currentDsp == "") currentDsp = dspNames[0];
+            if (ImGui::BeginCombo("Выбор листа ДСП для просмотра развертки", currentDsp.c_str()))
+            {
+                for (unsigned int i = 0; i < dspCount; i++)
+                {
+                    bool isSelected = (currentDsp == dspNames[i]);
+                    if (ImGui::Selectable(dspNames[i].c_str(), isSelected))
+                    {
+                        currentDsp = dspNames[i];
+                        selectedDsp = i;
+                    }
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::Image(reinterpret_cast<ImTextureID>(dspTextures[selectedDsp]->texture), {float(dspTextures[selectedDsp]->width) / 2, float(dspTextures[selectedDsp]->height) / 2});
+            if (ImGui::Button("Отмена"))
+            {
+                state->cursorLocked = false;
+                exportImage = false;
+            }
+            ImGui::End();
+        }
 
         newProjWinW = Window::_width / 3.0;
         newProjWinH = Window::_height / 3.0;
@@ -374,6 +460,8 @@ void GUIRenderer::renderMenuBar(State *state)
             }
             ImGui::EndPopup();
         }
+
+
         if (ImGui::BeginMenu("Справка"))
         {
             if (ImGui::MenuItem("Инструкция"))

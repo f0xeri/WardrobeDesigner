@@ -13,19 +13,21 @@
 class Texture
 {
 private:
-    unsigned char *data;
-    int width, height, nrChannels;
+
 public:
     GLuint texture;
     const char *name;
+    unsigned char *data;
+    int width, height, nrChannels;
     Texture(const char *name);
     ~Texture();
     void loadTexture();
     void bind();
 
     unsigned int loadCubemap(std::vector<std::string> faces);
+    void updateTexture();
 
-    GLuint loadDDS(const char *path);
+    static Texture* createEmptyTexture(int width, int height, int nrChannels, const char *name);
 };
 
 

@@ -85,7 +85,8 @@ int sgn(T val)
 
 void cursorCallback(GLFWwindow *window, double xpos, double ypos)
 {
-
+    if (localState->cursorLocked)
+        return;
     localState->deltaX = localState->deltaY = 0.0f;
     if (localState->cursorStarted)
     {
@@ -237,6 +238,8 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 
 void scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    if (localState->cursorLocked)
+        return;
     localState->arcBallCamera->setCameraView(localState->arcBallCamera->pos + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->lookat + localState->arcBallCamera->getViewDir() * (float)yoffset, localState->arcBallCamera->up);
     localState->arcBallCamera->zoom += yoffset;
 }

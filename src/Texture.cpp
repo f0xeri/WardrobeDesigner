@@ -82,3 +82,35 @@ unsigned int Texture::loadCubemap(std::vector<std::string> faces)
     LOG("[INFO] Cubemap " + std::string(name) + " loaded.");
     return textureID;
 }
+
+Texture *Texture::createEmptyTexture(int width, int height, int nrChannels, const char *name)
+{
+    Texture *t = new Texture(name);
+    t->width = width;
+    t->height = height;
+    t->height = height;
+    t->nrChannels = nrChannels;
+    t->data = new unsigned char[t->width * t->height * (nrChannels + 0)];
+    LOG("[INFO] Empty texture " + std::string(name) + " created.");
+    return t;
+}
+
+void Texture::updateTexture()
+{
+    glDeleteTextures(1, &texture);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 16);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    LOG("[INFO] Texture " + std::string(name) + " updated.");
+}
+
