@@ -186,8 +186,8 @@ void GUIRenderer::renderSettings(State *state)
                 auto c = must_be_deleted.back();
                 must_be_deleted.pop_back();
                 state->scene->objects.erase(
-                    std::remove(state->scene->objects.begin(), state->scene->objects.end(), c->linked_object),
-                    state->scene->objects.end());
+                        std::remove(state->scene->objects.begin(), state->scene->objects.end(), c->linked_object),
+                        state->scene->objects.end());
                 delete c;
             }
 
@@ -336,7 +336,7 @@ void GUIRenderer::renderMenuBar(State *state)
             {
                 exportImage = true;
                 auto data = convertDataForAlg(state);
-                auto res = algorythm(data, 2750, 1830, state->wardrobeGenerator->boardThickness);
+                auto res = algorythm(data, 2750, 1830);
                 dspCount = res.second;
                 for (int i = 0; i < dspCount; i++)
                 {

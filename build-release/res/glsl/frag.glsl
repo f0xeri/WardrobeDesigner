@@ -89,5 +89,5 @@ void main()
     color = (vec4(ambientLighting, 1) + shadow * (vec4(diffuse, 1) + vec4(specular, 1))) * texture(u_texture, pass_texCoord);
     if (isPicked == 1) color = vec4(1.0, 0.0, 0.0, 1.0);
     //color = vec4(dot(_normal, halfwayDir));
-    //color = vec4(_normal, 1.0);
+    color = vec4(_normal, 1.0);
 }

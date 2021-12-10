@@ -2,6 +2,8 @@
 // Created by Yaroslav on 10.02.2021.
 //
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <thread>
 #include <iostream>
 #include <glm/ext/matrix_projection.hpp>
