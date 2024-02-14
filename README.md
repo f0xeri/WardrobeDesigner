@@ -1,5 +1,9 @@
 # Интерактивная система по созданию дизайна нишевого шкафа и его раскроя
 
+![alt text](https://i.imgur.com/gbM7klq.png)
+
+Showcase: https://youtu.be/oNJsbRieMuA
+
 ## Сборка проекта с использованием MinGW
 
 1. Установить CMake версии 3.0 и выше
